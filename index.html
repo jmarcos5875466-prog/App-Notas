@@ -54,6 +54,42 @@
             color: #94a3b8;
         }
 
+        .empresa-card {
+            background: rgba(15, 23, 42, 0.6);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 14px;
+            padding: 15px;
+            margin-bottom: 15px;
+        }
+
+        .empresa-card label {
+            display: block;
+            font-size: 12px;
+            font-weight: 500;
+            color: #94a3b8;
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .empresa-card input {
+            width: 100%;
+            font-size: 15px;
+            font-weight: 600;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            padding: 10px 12px;
+            color: #38bdf8;
+            outline: none;
+            transition: all 0.2s;
+        }
+
+        .empresa-card input:focus {
+            border-color: #38bdf8;
+            background: rgba(255, 255, 255, 0.08);
+        }
+
         .config-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
@@ -442,6 +478,12 @@
         <p>Sistema Inteligente de Custos e Impostos</p>
     </header>
 
+    <!-- Empresa Emitente -->
+    <div class="empresa-card">
+        <label for="nomeEmpresa">Empresa / Fornecedor</label>
+        <input type="text" id="nomeEmpresa" placeholder="Nome da empresa emitente da nota..." autocomplete="off">
+    </div>
+
     <div class="config-grid">
         <!-- Imposto -->
         <div class="card-input">
@@ -708,7 +750,19 @@
                 const parser = new DOMParser();
                 const xmlDoc = parser.parseFromString(e.target.result, "text/xml");
 
-                // 1. Totais
+                // 1. Extrai Nome da Empresa (Emitente da Nota)
+                let emitenteNode = xmlDoc.getElementsByTagNameNS("*", "emit");
+                if (!emitenteNode || emitenteNode.length === 0) {
+                    emitenteNode = xmlDoc.getElementsByTagName("emit");
+                }
+
+                let nomeEmpresa = '';
+                if (emitenteNode && emitenteNode.length > 0) {
+                    nomeEmpresa = getTagText(emitenteNode[0], "xNome") || getTagText(emitenteNode[0], "xFant");
+                }
+                document.getElementById('nomeEmpresa').value = nomeEmpresa;
+
+                // 2. Totais
                 const icmsTotList = xmlDoc.getElementsByTagNameNS("*", "ICMSTot");
                 const totalNode = icmsTotList.length > 0 ? icmsTotList[0] : xmlDoc;
 
@@ -721,7 +775,7 @@
                 document.getElementById('valTotalNota').value = vNF ? vNF.toFixed(2) : '';
                 document.getElementById('valTotalProdutos').value = vProd ? vProd.toFixed(2) : '';
 
-                // 2. Itens (<det>)
+                // 3. Itens (<det>)
                 let itens = xmlDoc.getElementsByTagNameNS("*", "det");
                 if (!itens || itens.length === 0) {
                     itens = xmlDoc.getElementsByTagName("det");
@@ -739,7 +793,7 @@
                 qtdLinhasAtivas = itens.length;
                 dadosProdutos = {}; // Limpa memória anterior
 
-                // 3. Extrai dados dos itens do XML para a memória
+                // 4. Extrai dados dos itens do XML para a memória
                 Array.from(itens).forEach((item, index) => {
                     const i = index + 1;
                     garantirLinhaExistente(i);
@@ -756,10 +810,10 @@
                     dadosProdutos[i].qtdLote = qCom ? parseFloat(qCom).toString() : '1';
                 });
 
-                // 4. Desenha a tabela com os novos dados gravados na memória FIRST
+                // 5. Desenha a tabela com os novos dados gravados na memória FIRST
                 construirTabela(false);
 
-                // 5. Ajusta o painel visual e calcula imposto automaticamente
+                // 6. Ajusta o painel visual e calcula imposto automaticamente
                 const blocoValor = document.getElementById('blocoImpostoValor');
                 blocoValor.style.display = 'block';
 
@@ -788,6 +842,7 @@
     function limparTudo() {
         MAX_LINHAS = 25;
         qtdLinhasAtivas = 0;
+        document.getElementById('nomeEmpresa').value = '';
         document.getElementById('toggleNome').checked = true;
         document.getElementById('margemCustomInput').value = '';
         document.getElementById('valTotalNota').value = '';
