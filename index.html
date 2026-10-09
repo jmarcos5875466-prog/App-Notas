@@ -720,18 +720,16 @@
             blocoValor.style.display = 'block';
             ativarEstadoImpostoVisual(true);
             
-            document.getElementById('totalImposto').value = '';
-            document.getElementById('impostoAutoResultado').value = '';
-
-            if (modoImposto === 'auto') calcularImpostoAuto();
+            // Recalcula automático se já houver valores preenchidos na nota
+            if (modoImposto === 'auto') {
+                calcularImpostoAuto();
+            }
         } else {
             blocoValor.style.display = 'none';
-            document.getElementById('totalImposto').value = '';
-            document.getElementById('valTotalNota').value = '';
-            document.getElementById('valTotalProdutos').value = '';
-            document.getElementById('impostoAutoResultado').value = '';
             document.getElementById('infoDiferenca').style.display = 'none';
             ativarEstadoImpostoVisual(false);
+            // NOTA: Os campos valTotalNota e valTotalProdutos NÃO são apagados aqui,
+            // garantindo que se o usuário clicar sem querer em "Não" e voltar para "Sim", os dados não se percam.
         }
 
         if (redesenhar) {
