@@ -756,19 +756,24 @@
                     dadosProdutos[i].qtdLote = qCom ? parseFloat(qCom).toString() : '1';
                 });
 
-                // 4. Ajusta painel visual de imposto sem acionar redesenhos intermediários
+                // 4. Desenha a tabela com os novos dados gravados na memória FIRST
+                construirTabela(false);
+
+                // 5. Ajusta o painel visual e calcula imposto automaticamente
                 const blocoValor = document.getElementById('blocoImpostoValor');
                 blocoValor.style.display = 'block';
-                ativarEstadoImpostoVisual(true);
 
-                if (vNF > vProd) {
-                    const diff = vNF - vProd;
-                    document.getElementById('totalImposto').value = diff.toFixed(2);
-                    document.getElementById('impostoAutoResultado').value = formatarBR(diff);
+                if (modoImposto === 'auto') {
+                    calcularImpostoAuto();
+                } else {
+                    ativarEstadoImpostoVisual(true);
+                    if (vNF > vProd) {
+                        const diff = vNF - vProd;
+                        document.getElementById('totalImposto').value = diff.toFixed(2);
+                        document.getElementById('impostoAutoResultado').value = formatarBR(diff);
+                        atualizarCalculos();
+                    }
                 }
-
-                // 5. Constrói a tabela primeiro com os valores preservados na memória
-                construirTabela(false);
 
             } catch (err) {
                 alert("Erro ao ler o arquivo XML. Certifique-se de que é uma NF-e válida.");
