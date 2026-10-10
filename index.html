@@ -25,7 +25,7 @@
 
         .app-container {
             width: 100%;
-            max-width: 1250px;
+            max-width: 1350px;
             background: rgba(255, 255, 255, 0.05);
             backdrop-filter: blur(16px);
             -webkit-backdrop-filter: blur(16px);
@@ -256,13 +256,14 @@
             display: flex;
             flex-direction: column;
             justify-content: center;
+            gap: 10px;
         }
 
         .controls-title {
             font-size: 12px;
             font-weight: 500;
             color: #94a3b8;
-            margin-bottom: 8px;
+            margin-bottom: 2px;
             text-transform: uppercase;
             letter-spacing: 0.5px;
         }
@@ -276,7 +277,6 @@
             border-radius: 8px;
             border: 1px solid rgba(255, 255, 255, 0.1);
             cursor: pointer;
-            margin-top: 5px;
         }
 
         .toggle-container span {
@@ -548,13 +548,20 @@
                 </div>
             </div>
 
-            <!-- Painel de Exibição Condicional (Aparece exatamente abaixo da Margem quando o imposto está ATIVO) -->
+            <!-- Painel de Exibição Condicional (Aparece ao lado quando o bloco de imposto está visível) -->
             <div class="controls-panel" id="painelExibicaoCondicional" style="display: none;">
                 <div class="controls-title">Personalizar Exibição</div>
                 <label class="toggle-container">
                     <span>Nome do Produto</span>
                     <div class="switch">
-                        <input type="checkbox" id="toggleNome" checked onchange="construirTabela(true)">
+                        <input type="checkbox" id="toggleNome" checked onchange="sincronizarToggle(this)">
+                        <span class="slider"></span>
+                    </div>
+                </label>
+                <label class="toggle-container">
+                    <span>Margem Individual por Produto</span>
+                    <div class="switch">
+                        <input type="checkbox" id="toggleMargemIndividual" onchange="sincronizarToggleMargem(this)">
                         <span class="slider"></span>
                     </div>
                 </label>
@@ -562,13 +569,20 @@
         </div>
     </div>
 
-    <!-- Painel de Exibição Padrão (Fica em largura total quando o imposto está DESLIGADO) -->
+    <!-- Painel de Exibição Padrão (Largura total quando o bloco de imposto está oculto) -->
     <div class="controls-panel" id="painelExibicaoPadrao" style="margin-bottom: 25px;">
         <div class="controls-title">Personalizar Exibição</div>
-        <label class="toggle-container" style="justify-content: flex-start; gap: 10px;">
+        <label class="toggle-container" style="justify-content: flex-start; gap: 10px; margin-bottom: 8px;">
             <span>Nome do Produto</span>
             <div class="switch">
                 <input type="checkbox" id="toggleNomePadrao" checked onchange="sincronizarToggle(this)">
+                <span class="slider"></span>
+            </div>
+        </label>
+        <label class="toggle-container" style="justify-content: flex-start; gap: 10px;">
+            <span>Margem Individual por Produto</span>
+            <div class="switch">
+                <input type="checkbox" id="toggleMargemIndividualPadrao" onchange="sincronizarToggleMargem(this)">
                 <span class="slider"></span>
             </div>
         </label>
@@ -606,7 +620,7 @@
 
     function garantirLinhaExistente(i) {
         if (!dadosProdutos[i]) {
-            dadosProdutos[i] = { nome: '', valorTotal: '', qtdLote: '', custoManual: '' };
+            dadosProdutos[i] = { nome: '', valorTotal: '', qtdLote: '', margem: '' };
         }
     }
 
@@ -687,29 +701,49 @@
         atualizarCalculos();
     }
 
+    // Função ajustada para considerar a visibilidade do bloco de impostos na tela
+    function ajustarLayoutPaineis() {
+        const blocoValor = document.getElementById('blocoImpostoValor');
+        const painelCondicional = document.getElementById('painelExibicaoCondicional');
+        const painelPadrao = document.getElementById('painelExibicaoPadrao');
+
+        const blocoImpostoAberto = (blocoValor && blocoValor.style.display !== 'none');
+
+        if (blocoImpostoAberto) {
+            painelCondicional.style.display = 'flex';
+            painelPadrao.style.display = 'none';
+        } else {
+            painelCondicional.style.display = 'none';
+            painelPadrao.style.display = 'flex';
+        }
+    }
+
     function ativarEstadoImpostoVisual(temImposto) {
         const labelSim = document.getElementById('labelSim');
         const labelNao = document.getElementById('labelNao');
-        const painelCondicional = document.getElementById('painelExibicaoCondicional');
-        const painelPadrao = document.getElementById('painelExibicaoPadrao');
 
         if (temImposto) {
             labelSim.classList.add('active-sim');
             labelNao.classList.remove('active-nao');
-            painelCondicional.style.display = 'flex';
-            painelPadrao.style.display = 'none';
         } else {
             labelNao.classList.add('active-nao');
             labelSim.classList.remove('active-sim');
-            painelCondicional.style.display = 'none';
-            painelPadrao.style.display = 'flex';
         }
+
+        ajustarLayoutPaineis();
     }
 
     function sincronizarToggle(el) {
         const estado = el.checked;
         document.getElementById('toggleNome').checked = estado;
         document.getElementById('toggleNomePadrao').checked = estado;
+        construirTabela(true);
+    }
+
+    function sincronizarToggleMargem(el) {
+        const estado = el.checked;
+        document.getElementById('toggleMargemIndividual').checked = estado;
+        document.getElementById('toggleMargemIndividualPadrao').checked = estado;
         construirTabela(true);
     }
 
@@ -720,7 +754,6 @@
             blocoValor.style.display = 'block';
             ativarEstadoImpostoVisual(true);
             
-            // Recalcula automático se já houver valores preenchidos na nota
             if (modoImposto === 'auto') {
                 calcularImpostoAuto();
             }
@@ -728,8 +761,6 @@
             blocoValor.style.display = 'none';
             document.getElementById('infoDiferenca').style.display = 'none';
             ativarEstadoImpostoVisual(false);
-            // NOTA: Os campos valTotalNota e valTotalProdutos NÃO são apagados aqui,
-            // garantindo que se o usuário clicar sem querer em "Não" e voltar para "Sim", os dados não se percam.
         }
 
         if (redesenhar) {
@@ -752,10 +783,12 @@
             let elNome = document.getElementById(`nome_${i}`);
             let elTotal = document.getElementById(`total_${i}`);
             let elQtdLote = document.getElementById(`qtdLote_${i}`);
+            let elMargemItem = document.getElementById(`margemItem_${i}`);
 
             if (elNome) dadosProdutos[i].nome = elNome.value;
             if (elTotal) dadosProdutos[i].valorTotal = elTotal.value;
             if (elQtdLote) dadosProdutos[i].qtdLote = elQtdLote.value;
+            if (elMargemItem) dadosProdutos[i].margem = elMargemItem.value;
         }
     }
 
@@ -778,7 +811,6 @@
                 const parser = new DOMParser();
                 const xmlDoc = parser.parseFromString(e.target.result, "text/xml");
 
-                // 1. Extrai Nome da Empresa (Emitente da Nota)
                 let emitenteNode = xmlDoc.getElementsByTagNameNS("*", "emit");
                 if (!emitenteNode || emitenteNode.length === 0) {
                     emitenteNode = xmlDoc.getElementsByTagName("emit");
@@ -790,7 +822,6 @@
                 }
                 document.getElementById('nomeEmpresa').value = nomeEmpresa;
 
-                // 2. Totais
                 const icmsTotList = xmlDoc.getElementsByTagNameNS("*", "ICMSTot");
                 const totalNode = icmsTotList.length > 0 ? icmsTotList[0] : xmlDoc;
 
@@ -803,7 +834,6 @@
                 document.getElementById('valTotalNota').value = vNF ? vNF.toFixed(2) : '';
                 document.getElementById('valTotalProdutos').value = vProd ? vProd.toFixed(2) : '';
 
-                // 3. Itens (<det>)
                 let itens = xmlDoc.getElementsByTagNameNS("*", "det");
                 if (!itens || itens.length === 0) {
                     itens = xmlDoc.getElementsByTagName("det");
@@ -821,7 +851,6 @@
                 qtdLinhasAtivas = itens.length;
                 dadosProdutos = {}; 
 
-                // 4. Extrai dados dos itens do XML para a memória
                 Array.from(itens).forEach((item, index) => {
                     const i = index + 1;
                     garantirLinhaExistente(i);
@@ -838,17 +867,16 @@
                     dadosProdutos[i].qtdLote = qCom ? parseFloat(qCom).toString() : '1';
                 });
 
-                // 5. Desenha a tabela
-                construirTabela(false);
-
-                // 6. Ajusta o painel visual e calcula imposto automaticamente
+                // Garante que o bloco fique visível na importação do XML
                 const blocoValor = document.getElementById('blocoImpostoValor');
                 blocoValor.style.display = 'block';
+
+                construirTabela(false);
 
                 if (modoImposto === 'auto') {
                     calcularImpostoAuto();
                 } else {
-                    ativarEstadoImpostoVisual(true);
+                    ativarEstadoImpostoVisual(vNF > vProd);
                     if (vNF > vProd) {
                         const diff = vNF - vProd;
                         document.getElementById('totalImposto').value = diff.toFixed(2);
@@ -856,6 +884,9 @@
                         atualizarCalculos();
                     }
                 }
+
+                // Ajusta o alinhamento correto dos painéis
+                ajustarLayoutPaineis();
 
             } catch (err) {
                 alert("Erro ao ler o arquivo XML. Certifique-se de que é uma NF-e válida.");
@@ -873,6 +904,8 @@
         document.getElementById('nomeEmpresa').value = '';
         document.getElementById('toggleNome').checked = true;
         document.getElementById('toggleNomePadrao').checked = true;
+        document.getElementById('toggleMargemIndividual').checked = false;
+        document.getElementById('toggleMargemIndividualPadrao').checked = false;
         document.getElementById('margemCustomInput').value = '';
         document.getElementById('valTotalNota').value = '';
         document.getElementById('valTotalProdutos').value = '';
@@ -895,8 +928,11 @@
             salvarDadosNaMemoria();
         }
 
-        const temImposto = document.getElementById('labelSim').classList.contains('active-sim');
+        const blocoValor = document.getElementById('blocoImpostoValor');
+        const temImposto = (blocoValor && blocoValor.style.display !== 'none');
+        
         const mostrarNome = document.getElementById('toggleNome').checked;
+        const margemIndividual = document.getElementById('toggleMargemIndividual').checked;
 
         let thHTML = `<th style="width: 40px; text-align: center;">Ativo</th><th>Nº</th>`;
         if (mostrarNome) thHTML += `<th>Nome do Produto</th>`;
@@ -909,6 +945,7 @@
         
         thHTML += `<th>Quantidade</th>`;
         thHTML += `<th>Custo Unitário</th>`;
+        if (margemIndividual) thHTML += `<th>Margem (%)</th>`;
         thHTML += `<th>Preço de Venda</th>`;
 
         document.getElementById('cabecalhoTabela').innerHTML = thHTML;
@@ -928,6 +965,7 @@
             let valNome = item.nome || '';
             let valTotal = item.valorTotal || '';
             let valQtd = item.qtdLote || '';
+            let valMargemItem = item.margem || '';
 
             linhasHTML += `<tr ${classeLinha}>`;
             linhasHTML += `<td class="coluna-selecao" onclick="selecionarAtendimentoLinhas(${i})">
@@ -947,6 +985,11 @@
 
             linhasHTML += `<td><input type="number" id="qtdLote_${i}" class="input-custo" value="${valQtd}" placeholder="1" oninput="atualizarCalculos()" ${!estaAtiva ? 'tabindex="-1"' : ''}></td>`;
             linhasHTML += `<td id="custoFinal_${i}" class="badge-custo">R$ 0,00</td>`;
+            
+            if (margemIndividual) {
+                linhasHTML += `<td><input type="number" id="margemItem_${i}" class="input-custo" value="${valMargemItem}" placeholder="Ex: 30" step="0.1" oninput="atualizarCalculos()" ${!estaAtiva ? 'tabindex="-1"' : ''}></td>`;
+            }
+
             linhasHTML += `<td id="precoSel_${i}" class="badge-preco">R$ 0,00</td>`;
             linhasHTML += `</tr>`;
         }
@@ -958,7 +1001,9 @@
     function atualizarCalculos() {
         salvarDadosNaMemoria();
 
-        const temImposto = document.getElementById('labelSim').classList.contains('active-sim');
+        const blocoValor = document.getElementById('blocoImpostoValor');
+        const temImposto = (blocoValor && blocoValor.style.display !== 'none');
+        const margemIndividual = document.getElementById('toggleMargemIndividual').checked;
         const valorTotalImposto = temImposto ? (parseFloat(document.getElementById('totalImposto').value) || 0) : 0;
         
         const impostoPorLinha = (temImposto && qtdLinhasAtivas > 0) ? (valorTotalImposto / qtdLinhasAtivas) : 0;
@@ -993,10 +1038,14 @@
             if (elCustoFinal) elCustoFinal.innerText = `R$ ${formatarBR(custoUnitarioFinal)}`;
 
             let pct = 0;
-            if (margemSelecionada === 'custom') {
-                pct = parseFloat(document.getElementById('margemCustomInput').value) || 0;
-            } else if (margemSelecionada !== null) {
-                pct = parseFloat(margemSelecionada) || 0;
+            if (margemIndividual && item.margem !== '') {
+                pct = parseFloat(item.margem) || 0;
+            } else {
+                if (margemSelecionada === 'custom') {
+                    pct = parseFloat(document.getElementById('margemCustomInput').value) || 0;
+                } else if (margemSelecionada !== null) {
+                    pct = parseFloat(margemSelecionada) || 0;
+                }
             }
 
             let precoVenda = custoUnitarioFinal * (1 + (pct / 100));
