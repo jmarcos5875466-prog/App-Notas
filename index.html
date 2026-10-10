@@ -116,14 +116,14 @@
             letter-spacing: 0.5px;
         }
 
-        .margin-buttons {
+        .radio-group, .margin-buttons {
             display: flex;
             gap: 8px;
             margin-top: 5px;
             flex-wrap: wrap;
         }
 
-        .margin-btn {
+        .radio-btn, .margin-btn {
             flex: 1;
             min-width: 50px;
             background: rgba(255, 255, 255, 0.05);
@@ -139,41 +139,113 @@
             user-select: none;
         }
 
-        .margin-btn:hover { background: rgba(255, 255, 255, 0.1); }
+        .radio-btn input { display: none; }
 
-        .margin-btn.active {
+        .radio-btn:hover, .margin-btn:hover { background: rgba(255, 255, 255, 0.1); }
+
+        .radio-btn.active-sim, .margin-btn.active {
             background: rgba(56, 189, 248, 0.2);
             border-color: #38bdf8;
             color: #38bdf8;
         }
 
-        #blocoMargemCustom {
+        .radio-btn.active-nao {
+            background: rgba(239, 68, 68, 0.2);
+            border-color: #ef4444;
+            color: #f87171;
+        }
+
+        #blocoImpostoValor, #blocoMargemCustom, #blocoStTotal {
             display: none;
             margin-top: 12px;
             padding-top: 12px;
             border-top: 1px solid rgba(255, 255, 255, 0.08);
         }
 
-        .bloco-aviso-despesas {
-            display: none;
-            background: rgba(245, 158, 11, 0.1);
-            border: 1px solid rgba(245, 158, 11, 0.3);
-            border-radius: 10px;
-            padding: 12px;
-            margin-top: 5px;
+        .modo-imposto-container {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 12px;
         }
 
-        .bloco-aviso-despesas label {
-            color: #f59e0b !important;
-            margin-bottom: 4px !important;
-        }
-
-        .aviso-texto-diferenca {
+        .btn-modo-imposto {
+            flex: 1;
+            padding: 6px;
             font-size: 11px;
-            color: #fbbf24;
-            display: block;
-            margin-top: 6px;
-            line-height: 1.4;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 6px;
+            color: #94a3b8;
+            cursor: pointer;
+            text-align: center;
+        }
+
+        .btn-modo-imposto.active {
+            background: rgba(56, 189, 248, 0.2);
+            border-color: #38bdf8;
+            color: #38bdf8;
+            font-weight: 600;
+        }
+
+        .grid-campos-auto {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+            gap: 10px;
+        }
+
+        .campo-sub-input {
+            margin-bottom: 5px;
+        }
+
+        .campo-sub-input label {
+            font-size: 10px;
+            margin-bottom: 4px;
+            white-space: nowrap;
+        }
+
+        .campo-sub-input input {
+            width: 100%;
+            font-size: 14px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 6px;
+            padding: 6px 8px;
+            color: #fff;
+            outline: none;
+        }
+
+        .campo-sub-input input.resultado-imposto {
+            background: rgba(245, 158, 11, 0.15);
+            border-color: rgba(245, 158, 11, 0.4);
+            color: #f59e0b;
+            font-weight: 700;
+        }
+
+        .campo-sub-input input.resultado-desconto {
+            background: rgba(34, 197, 94, 0.15);
+            border-color: rgba(34, 197, 94, 0.4);
+            color: #4ade80;
+            font-weight: 700;
+        }
+
+        .info-diferenca {
+            font-size: 11px;
+            padding: 6px;
+            border-radius: 6px;
+            margin-top: 8px;
+            display: none;
+        }
+
+        .info-diferenca.imposto {
+            background: rgba(245, 158, 11, 0.15);
+            color: #f59e0b;
+            border: 1px solid rgba(245, 158, 11, 0.3);
+        }
+
+        .info-diferenca.desconto {
+            background: rgba(34, 197, 94, 0.15);
+            color: #4ade80;
+            border: 1px solid rgba(34, 197, 94, 0.3);
         }
 
         .controls-panel {
@@ -386,7 +458,7 @@
             background: rgba(255, 255, 255, 0.12);
         }
 
-        .badge-despesa { color: #f59e0b; font-weight: 600; font-size: 13px; }
+        .badge-imposto { color: #f59e0b; font-weight: 600; font-size: 13px; }
         .badge-custo-total { color: #fbbf24; font-weight: 700; }
         .badge-custo { color: #38bdf8; font-weight: 600; }
         .badge-preco { color: #4ade80; font-weight: 700; font-size: 13px; }
@@ -395,6 +467,7 @@
             .config-grid { grid-template-columns: 1fr; }
             .app-container { padding: 15px; }
             body { padding: 10px; }
+            .grid-campos-auto { grid-template-columns: 1fr; }
             .actions-bar { flex-direction: column; align-items: stretch; }
         }
     </style>
@@ -414,23 +487,58 @@
     </div>
 
     <div class="config-grid">
-        <!-- Coluna da Esquerda: Painel Dinâmico (ST vs Outras Despesas) -->
+        <!-- Coluna da Esquerda: Imposto / Acréscimos -->
         <div class="card-input">
-            <div id="blocoImpostoTotal">
-                <label for="totalImposto">Valor Total dos Impostos (ICMS ST)</label>
-                <input type="number" id="totalImposto" placeholder="0,00" step="0.01" readonly style="width:100%; font-size:16px; font-weight:700; background:rgba(245, 158, 11, 0.1); border:1px solid rgba(245, 158, 11, 0.3); border-radius:8px; padding:10px 12px; color:#f59e0b; margin-top: 5px;">
+            <label>A nota tem imposto / acréscimo?</label>
+            <div class="radio-group">
+                <label class="radio-btn" id="labelSim" onclick="verificarImposto('sim')">
+                    <input type="radio" name="temImposto" value="sim"> Sim
+                </label>
+                <label class="radio-btn active-nao" id="labelNao" onclick="verificarImposto('nao')">
+                    <input type="radio" name="temImposto" value="nao" checked> Não
+                </label>
+            </div>
+
+            <!-- Bloco 1: Apenas para ICMS ST do Produto -->
+            <div id="blocoStTotal">
+                <label for="totalStImposto">Valor Total dos Impostos (ICMS ST)</label>
+                <input type="text" id="totalStImposto" placeholder="0,00" readonly style="width:100%; font-size:16px; font-weight:700; background:rgba(245, 158, 11, 0.1); border:1px solid rgba(245, 158, 11, 0.3); border-radius:8px; padding:10px 12px; color:#f59e0b; margin-top: 5px;">
                 <span style="font-size: 11px; color: #94a3b8; display: block; margin-top: 6px;">* Soma automática dos valores de ICMS ST dos produtos</span>
             </div>
 
-            <!-- Bloco Condicional para Outras Despesas / Encargos -->
-            <div id="blocoOutrasDespesas" class="bloco-aviso-despesas">
-                <label for="outrasDespesasInput">Outras Despesas / Encargos (R$)</label>
-                <input type="number" id="outrasDespesasInput" placeholder="0,00" step="0.01" style="width:100%; font-size:14px; font-weight:600; background:rgba(255, 255, 255, 0.05); border:1px solid rgba(245, 158, 11, 0.4); border-radius:6px; padding:8px 10px; color:#f59e0b;" oninput="atualizarCalculos()">
-                <span id="textoAvisoDiferenca" class="aviso-texto-diferenca"></span>
+            <!-- Bloco 2: Para Acréscimo / Desconto (Nota x Prod) -->
+            <div id="blocoImpostoValor">
+                <div class="modo-imposto-container">
+                    <div class="btn-modo-imposto active" id="btnModoAuto" onclick="alternarModoImposto('auto')">Automático (Nota x Prod.)</div>
+                    <div class="btn-modo-imposto" id="btnModoManual" onclick="alternarModoImposto('manual')">Manual</div>
+                </div>
+
+                <div id="camposAutoImposto">
+                    <div class="grid-campos-auto">
+                        <div class="campo-sub-input">
+                            <label for="valTotalNota">Total Nota (R$)</label>
+                            <input type="text" id="valTotalNota" placeholder="0,00" readonly style="width:100%; font-size:14px; font-weight:600; background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1); border-radius:6px; padding:6px 8px; color:#fff;">
+                        </div>
+                        <div class="campo-sub-input">
+                            <label for="valTotalProdutos">Total Prod. (R$)</label>
+                            <input type="text" id="valTotalProdutos" placeholder="0,00" readonly style="width:100%; font-size:14px; font-weight:600; background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1); border-radius:6px; padding:6px 8px; color:#fff;">
+                        </div>
+                        <div class="campo-sub-input">
+                            <label for="impostoAutoResultado" id="labelResultadoAjuste">Ajuste (R$)</label>
+                            <input type="text" id="impostoAutoResultado" class="resultado-imposto" placeholder="0,00" readonly>
+                        </div>
+                    </div>
+                    <div id="infoDiferenca" class="info-diferenca"></div>
+                </div>
+
+                <div id="camposManualImposto" style="display: none;">
+                    <label for="totalImposto" id="labelManualAjuste">Valor do Ajuste (R$)</label>
+                    <input type="number" id="totalImposto" placeholder="0,00" step="0.01" style="width:100%; font-size:14px; background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1); border-radius:6px; padding:6px 8px; color:#fff;" oninput="atualizarCalculos()">
+                </div>
             </div>
         </div>
 
-        <!-- Coluna da Direita: Margem + Painel de Exibição -->
+        <!-- Coluna da Direita: Margem + Painel Condicional -->
         <div style="display: flex; flex-direction: column; gap: 15px;">
             <div class="card-input">
                 <label>Margem de Venda</label>
@@ -448,24 +556,44 @@
                 </div>
             </div>
 
-            <div class="controls-panel">
+            <!-- Painel de Exibição Condicional -->
+            <div class="controls-panel" id="painelExibicaoCondicional" style="display: none;">
                 <div class="controls-title">Personalizar Exibição</div>
                 <label class="toggle-container">
                     <span>Nome do Produto</span>
                     <div class="switch">
-                        <input type="checkbox" id="toggleNome" checked onchange="construirTabela(true)">
+                        <input type="checkbox" id="toggleNome" checked onchange="sincronizarToggle(this)">
                         <span class="slider"></span>
                     </div>
                 </label>
                 <label class="toggle-container">
                     <span>Margem Individual por Produto</span>
                     <div class="switch">
-                        <input type="checkbox" id="toggleMargemIndividual" onchange="construirTabela(true)">
+                        <input type="checkbox" id="toggleMargemIndividual" onchange="sincronizarToggleMargem(this)">
                         <span class="slider"></span>
                     </div>
                 </label>
             </div>
         </div>
+    </div>
+
+    <!-- Painel de Exibição Padrão -->
+    <div class="controls-panel" id="painelExibicaoPadrao" style="margin-bottom: 25px;">
+        <div class="controls-title">Personalizar Exibição</div>
+        <label class="toggle-container" style="justify-content: flex-start; gap: 10px; margin-bottom: 8px;">
+            <span>Nome do Produto</span>
+            <div class="switch">
+                <input type="checkbox" id="toggleNomePadrao" checked onchange="sincronizarToggle(this)">
+                <span class="slider"></span>
+            </div>
+        </label>
+        <label class="toggle-container" style="justify-content: flex-start; gap: 10px;">
+            <span>Margem Individual por Produto</span>
+            <div class="switch">
+                <input type="checkbox" id="toggleMargemIndividualPadrao" onchange="sincronizarToggleMargem(this)">
+                <span class="slider"></span>
+            </div>
+        </label>
     </div>
 
     <div class="actions-bar">
@@ -491,7 +619,11 @@
     let qtdLinhasAtivas = 0;
     let dadosProdutos = {};
     let margemSelecionada = null;
-    let valorTotalNotaXML = 0;
+    let modoImposto = 'auto';
+    let tipoAjusteNota = 'imposto';
+    let valorNotaXMLGlobal = 0;
+    let valorProdutosXMLGlobal = 0;
+    let temStNaNota = false;
 
     function formatarBR(valor) {
         const num = parseFloat(valor) || 0;
@@ -512,6 +644,165 @@
         const blocoCustom = document.getElementById('blocoMargemCustom');
         blocoCustom.style.display = (valor === 'custom') ? 'block' : 'none';
         construirTabela(true);
+    }
+
+    function alternarModoImposto(modo) {
+        modoImposto = modo;
+        const btnAuto = document.getElementById('btnModoAuto');
+        const btnManual = document.getElementById('btnModoManual');
+        const camposAuto = document.getElementById('camposAutoImposto');
+        const camposManual = document.getElementById('camposManualImposto');
+
+        if (modo === 'auto') {
+            btnAuto.classList.add('active');
+            btnManual.classList.remove('active');
+            camposAuto.style.display = 'block';
+            camposManual.style.display = 'none';
+            calcularImpostoAuto();
+        } else {
+            btnManual.classList.add('active');
+            btnAuto.classList.remove('active');
+            camposManual.style.display = 'block';
+            camposAuto.style.display = 'none';
+            atualizarCalculos();
+        }
+    }
+
+    function calcularImpostoAuto() {
+        if (modoImposto !== 'auto') return;
+
+        const vNota = valorNotaXMLGlobal;
+        const vProd = valorProdutosXMLGlobal;
+
+        const infoDiv = document.getElementById('infoDiferenca');
+        const totalImpInput = document.getElementById('totalImposto');
+        const impostoResultadoInput = document.getElementById('impostoAutoResultado');
+        const labelResultado = document.getElementById('labelResultadoAjuste');
+        const labelManual = document.getElementById('labelManualAjuste');
+
+        let tipoAntigo = tipoAjusteNota;
+
+        if (vNota > 0 && vProd > 0) {
+            if (vNota > vProd) {
+                tipoAjusteNota = 'imposto';
+                const diffImposto = vNota - vProd;
+                totalImpInput.value = diffImposto.toFixed(2);
+                impostoResultadoInput.value = formatarBR(diffImposto);
+                impostoResultadoInput.className = 'resultado-imposto';
+                labelResultado.innerText = 'Acréscimo (R$)';
+                if (labelManual) labelManual.innerText = 'Valor Total do Acréscimo (R$)';
+                infoDiv.className = 'info-diferenca imposto';
+                infoDiv.style.display = 'block';
+                infoDiv.innerText = `Acréscimo apurado (R$ ${formatarBR(diffImposto)})`;
+                ativarEstadoImpostoVisual(true);
+            } else if (vNota < vProd) {
+                tipoAjusteNota = 'desconto';
+                const diffDesconto = vProd - vNota;
+                totalImpInput.value = diffDesconto.toFixed(2);
+                impostoResultadoInput.value = formatarBR(diffDesconto);
+                impostoResultadoInput.className = 'resultado-desconto';
+                labelResultado.innerText = 'Desconto (R$)';
+                if (labelManual) labelManual.innerText = 'Valor Total do Desconto (R$)';
+                infoDiv.className = 'info-diferenca desconto';
+                infoDiv.style.display = 'block';
+                infoDiv.innerText = `Desconto na Nota (R$ ${formatarBR(diffDesconto)})`;
+                ativarEstadoImpostoVisual(true);
+            } else {
+                tipoAjusteNota = 'imposto';
+                totalImpInput.value = '0.00';
+                impostoResultadoInput.value = '0,00';
+                impostoResultadoInput.className = 'resultado-imposto';
+                labelResultado.innerText = 'Ajuste (R$)';
+                infoDiv.className = 'info-diferenca';
+                infoDiv.style.display = 'block';
+                infoDiv.innerText = `Nota sem diferenças (Valores iguais)`;
+                ativarEstadoImpostoVisual(true);
+            }
+        } else {
+            infoDiv.style.display = 'none';
+            totalImpInput.value = '';
+            impostoResultadoInput.value = '';
+            impostoResultadoInput.className = 'resultado-imposto';
+        }
+
+        if (tipoAntigo !== tipoAjusteNota) {
+            construirTabela(true);
+        } else {
+            ajustarLayoutPaineis();
+            atualizarCalculos();
+        }
+    }
+
+    function ajustarLayoutPaineis() {
+        const blocoValor = document.getElementById('blocoImpostoValor');
+        const blocoSt = document.getElementById('blocoStTotal');
+        const painelCondicional = document.getElementById('painelExibicaoCondicional');
+        const painelPadrao = document.getElementById('painelExibicaoPadrao');
+
+        const aberto = (blocoValor.style.display !== 'none' || blocoSt.style.display !== 'none');
+
+        if (aberto) {
+            painelCondicional.style.display = 'flex';
+            painelPadrao.style.display = 'none';
+        } else {
+            painelCondicional.style.display = 'none';
+            painelPadrao.style.display = 'flex';
+        }
+    }
+
+    function ativarEstadoImpostoVisual(temImposto) {
+        const labelSim = document.getElementById('labelSim');
+        const labelNao = document.getElementById('labelNao');
+
+        if (temImposto) {
+            labelSim.classList.add('active-sim');
+            labelNao.classList.remove('active-nao');
+        } else {
+            labelNao.classList.add('active-nao');
+            labelSim.classList.remove('active-sim');
+        }
+
+        ajustarLayoutPaineis();
+    }
+
+    function sincronizarToggle(el) {
+        const estado = el.checked;
+        document.getElementById('toggleNome').checked = estado;
+        document.getElementById('toggleNomePadrao').checked = estado;
+        construirTabela(true);
+    }
+
+    function sincronizarToggleMargem(el) {
+        const estado = el.checked;
+        document.getElementById('toggleMargemIndividual').checked = estado;
+        document.getElementById('toggleMargemIndividualPadrao').checked = estado;
+        construirTabela(true);
+    }
+
+    function verificarImposto(opcao, redesenhar = true) {
+        const blocoValor = document.getElementById('blocoImpostoValor');
+        const blocoSt = document.getElementById('blocoStTotal');
+
+        if (opcao === 'sim') {
+            if (temStNaNota) {
+                blocoSt.style.display = 'block';
+                blocoValor.style.display = 'none';
+            } else {
+                blocoValor.style.display = 'block';
+                blocoSt.style.display = 'none';
+                if (modoImposto === 'auto') calcularImpostoAuto();
+            }
+            ativarEstadoImpostoVisual(true);
+        } else {
+            blocoValor.style.display = 'none';
+            blocoSt.style.display = 'none';
+            document.getElementById('infoDiferenca').style.display = 'none';
+            ativarEstadoImpostoVisual(false);
+        }
+
+        if (redesenhar) {
+            construirTabela(true);
+        }
     }
 
     function selecionarAtendimentoLinhas(linhaAlvo) {
@@ -572,7 +863,15 @@
 
                 const icmsTotList = xmlDoc.getElementsByTagNameNS("*", "ICMSTot");
                 const totalNode = icmsTotList.length > 0 ? icmsTotList[0] : xmlDoc;
-                valorTotalNotaXML = parseFloat(getTagText(totalNode, "vNF")) || 0;
+
+                const vNFVal = getTagText(totalNode, "vNF");
+                const vProdVal = getTagText(totalNode, "vProd");
+
+                valorNotaXMLGlobal = parseFloat(vNFVal) || 0;
+                valorProdutosXMLGlobal = parseFloat(vProdVal) || 0;
+
+                document.getElementById('valTotalNota').value = valorNotaXMLGlobal ? formatarBR(valorNotaXMLGlobal) : '';
+                document.getElementById('valTotalProdutos').value = valorProdutosXMLGlobal ? formatarBR(valorProdutosXMLGlobal) : '';
 
                 let itens = xmlDoc.getElementsByTagNameNS("*", "det");
                 if (!itens || itens.length === 0) {
@@ -590,6 +889,7 @@
 
                 qtdLinhasAtivas = itens.length;
                 dadosProdutos = {}; 
+                temStNaNota = false;
 
                 Array.from(itens).forEach((item, index) => {
                     const i = index + 1;
@@ -607,8 +907,13 @@
                     dadosProdutos[i].valorTotal = vProdItem ? parseFloat(vProdItem).toFixed(2) : '';
                     dadosProdutos[i].icmsST = vICMSST ? parseFloat(vICMSST).toFixed(2) : '';
                     dadosProdutos[i].qtdLote = qCom ? parseFloat(qCom).toString() : '1';
+
+                    if (parseFloat(vICMSST) > 0) {
+                        temStNaNota = true;
+                    }
                 });
 
+                verificarImposto('sim', false);
                 construirTabela(false);
 
             } catch (err) {
@@ -624,13 +929,21 @@
     function limparTudo() {
         MAX_LINHAS = 25;
         qtdLinhasAtivas = 0;
-        valorTotalNotaXML = 0;
+        tipoAjusteNota = 'imposto';
+        valorNotaXMLGlobal = 0;
+        valorProdutosXMLGlobal = 0;
+        temStNaNota = false;
         document.getElementById('nomeEmpresa').value = '';
         document.getElementById('toggleNome').checked = true;
+        document.getElementById('toggleNomePadrao').checked = true;
         document.getElementById('toggleMargemIndividual').checked = false;
+        document.getElementById('toggleMargemIndividualPadrao').checked = false;
         document.getElementById('margemCustomInput').value = '';
+        document.getElementById('valTotalNota').value = '';
+        document.getElementById('valTotalProdutos').value = '';
+        document.getElementById('impostoAutoResultado').value = '';
         document.getElementById('totalImposto').value = '';
-        document.getElementById('outrasDespesasInput').value = '';
+        document.getElementById('totalStImposto').value = '';
 
         dadosProdutos = {};
 
@@ -638,15 +951,9 @@
         document.querySelectorAll('.margin-btn').forEach(btn => btn.classList.remove('active'));
         document.getElementById('blocoMargemCustom').style.display = 'none';
 
+        alternarModoImposto('auto');
+        verificarImposto('nao', false);
         construirTabela(false);
-    }
-
-    function temStAtivo() {
-        for (let i = 1; i <= qtdLinhasAtivas; i++) {
-            let st = parseFloat(dadosProdutos[i]?.icmsST) || 0;
-            if (st > 0) return true;
-        }
-        return false;
     }
 
     function construirTabela(deveSalvarDOM = true) {
@@ -656,19 +963,22 @@
 
         const mostrarNome = document.getElementById('toggleNome').checked;
         const margemIndividual = document.getElementById('toggleMargemIndividual').checked;
-        const existeSt = temStAtivo();
+        const blocoValor = document.getElementById('blocoImpostoValor');
+        const temAjuste = (blocoValor && blocoValor.style.display !== 'none');
+        const totalImpostoGlobal = temAjuste && tipoAjusteNota === 'imposto' ? (parseFloat(document.getElementById('totalImposto').value) || 0) : 0;
+        const mostrarAcrescimo = temAjuste && tipoAjusteNota === 'imposto' && totalImpostoGlobal > 0;
 
         let thHTML = `<th style="width: 40px; text-align: center;">Ativo</th><th>Nº</th>`;
         if (mostrarNome) thHTML += `<th>Nome do Produto</th>`;
         thHTML += `<th>Valor Total</th>`;
         
-        if (existeSt) {
+        if (temStNaNota) {
             thHTML += `<th>ICMS ST</th>`;
-        } else {
-            thHTML += `<th>Outras Despesas</th>`;
+        } else if (mostrarAcrescimo) {
+            thHTML += `<th>Acréscimo</th>`;
         }
 
-        thHTML += `<th>Custo Total c/ Imp.</th>`;
+        thHTML += `<th>Custo Total</th>`;
         thHTML += `<th>Quantidade</th>`;
         thHTML += `<th>Custo Unitário</th>`;
         if (margemIndividual) thHTML += `<th>Margem (%)</th>`;
@@ -705,10 +1015,10 @@
             }
             linhasHTML += `<td><input type="number" id="total_${i}" class="input-custo" value="${valTotal}" placeholder="0,00" step="0.01" oninput="atualizarCalculos()" ${!estaAtiva ? 'tabindex="-1"' : ''}></td>`;
             
-            if (existeSt) {
+            if (temStNaNota) {
                 linhasHTML += `<td><input type="number" id="icmsST_${i}" class="input-custo" value="${valIcmsST}" placeholder="0,00" step="0.01" oninput="atualizarCalculos()" ${!estaAtiva ? 'tabindex="-1"' : ''}></td>`;
-            } else {
-                linhasHTML += `<td id="parcelaDespesa_${i}" class="badge-despesa">0,00</td>`;
+            } else if (mostrarAcrescimo) {
+                linhasHTML += `<td id="parcelaImposto_${i}" class="badge-imposto">0,00</td>`;
             }
 
             linhasHTML += `<td id="custoTotalComImposto_${i}" class="badge-custo-total">R$ 0,00</td>`;
@@ -731,75 +1041,33 @@
         salvarDadosNaMemoria();
 
         const margemIndividual = document.getElementById('toggleMargemIndividual').checked;
-        
-        let somaIcmsStTotal = 0;
-        let somaProdutosTotal = 0;
 
-        for (let i = 1; i <= MAX_LINHAS; i++) {
-            if (i <= qtdLinhasAtivas) {
-                let item = dadosProdutos[i];
-                somaIcmsStTotal += parseFloat(item.icmsST) || 0;
-                somaProdutosTotal += parseFloat(item.valorTotal) || 0;
-            }
+        let somaStGlobal = 0;
+        for (let i = 1; i <= qtdLinhasAtivas; i++) {
+            somaStGlobal += parseFloat(dadosProdutos[i]?.icmsST) || 0;
         }
 
-        const blocoSt = document.getElementById('blocoImpostoTotal');
-        const blocoDespesas = document.getElementById('blocoOutrasDespesas');
-        const inputDespesas = document.getElementById('outrasDespesasInput');
-        const textoAviso = document.getElementById('textoAvisoDiferenca');
-
-        let despesasValor = 0;
-        let existeSt = somaIcmsStTotal > 0;
-
-        // Se o estado visual do ST mudou em relação à tabela, reconstrói para trocar a coluna
-        let thStAtual = document.querySelector('th:nth-child(4)').innerText;
-        let deveRecriarTabela = (existeSt && thStAtual.includes('DESPESAS')) || (!existeSt && thStAtual.includes('ICMS ST'));
-
-        if (existeSt) {
-            blocoSt.style.display = 'block';
-            blocoDespesas.style.display = 'none';
-            document.getElementById('totalImposto').value = somaIcmsStTotal.toFixed(2);
-            inputDespesas.value = '';
-        } else {
-            blocoSt.style.display = 'none';
-
-            if (valorTotalNotaXML > 0 && Math.abs(valorTotalNotaXML - somaProdutosTotal) > 0.01) {
-                blocoDespesas.style.display = 'block';
-                let diferencaCalculada = valorTotalNotaXML - somaProdutosTotal;
-                if (inputDespesas.value === '') {
-                    inputDespesas.value = diferencaCalculada > 0 ? diferencaCalculada.toFixed(2) : '0.00';
-                }
-                despesasValor = parseFloat(inputDespesas.value) || 0;
-                textoAviso.innerText = `* Valor gerado porque o valor total da nota (R$ ${formatarBR(valorTotalNotaXML)}) é diferente do valor total dos produtos (R$ ${formatarBR(somaProdutosTotal)}).`;
-            } else if (inputDespesas.value !== '' && parseFloat(inputDespesas.value) > 0) {
-                blocoDespesas.style.display = 'block';
-                despesasValor = parseFloat(inputDespesas.value) || 0;
-                textoAviso.innerText = `* Inserido manualmente para ratear encargos/despesas extras entre os itens.`;
-            } else {
-                blocoDespesas.style.display = 'none';
-                inputDespesas.value = '';
-            }
+        if (temStNaNota) {
+            document.getElementById('totalStImposto').value = formatarBR(somaStGlobal);
         }
 
-        if (deveRecriarTabela) {
-            construirTabela(false);
-            return;
-        }
-
-        let despesasPorLinha = (qtdLinhasAtivas > 0) ? (despesasValor / qtdLinhasAtivas) : 0;
+        const blocoValor = document.getElementById('blocoImpostoValor');
+        const temAjuste = (blocoValor && blocoValor.style.display !== 'none');
+        const totalImpostoGlobal = temAjuste && tipoAjusteNota === 'imposto' ? (parseFloat(document.getElementById('totalImposto').value) || 0) : 0;
+        const impostoPorLinha = (temAjuste && tipoAjusteNota === 'imposto' && qtdLinhasAtivas > 0 && totalImpostoGlobal > 0) ? (totalImpostoGlobal / qtdLinhasAtivas) : 0;
 
         for (let i = 1; i <= MAX_LINHAS; i++) {
             garantirLinhaExistente(i);
             let item = dadosProdutos[i];
             let estaAtiva = i <= qtdLinhasAtivas;
 
-            let elParcelaDespesa = document.getElementById(`parcelaDespesa_${i}`);
+            let elParcelaImposto = document.getElementById(`parcelaImposto_${i}`);
             let elCustoTotalComImposto = document.getElementById(`custoTotalComImposto_${i}`);
             let elCustoFinal = document.getElementById(`custoFinal_${i}`);
             let elPrecoSel = document.getElementById(`precoSel_${i}`);
 
             if (!estaAtiva) {
-                if (elParcelaDespesa) elParcelaDespesa.innerText = '0,00';
+                if (elParcelaImposto) elParcelaImposto.innerText = '0,00';
                 if (elCustoTotalComImposto) elCustoTotalComImposto.innerText = 'R$ 0,00';
                 if (elCustoFinal) elCustoFinal.innerText = 'R$ 0,00';
                 if (elPrecoSel) elPrecoSel.innerText = 'R$ 0,00';
@@ -807,14 +1075,18 @@
             }
 
             let vTotalCaixa = parseFloat(item.valorTotal) || 0;
-            let icmsSTItem = existeSt ? (parseFloat(item.icmsST) || 0) : 0;
-            let acréscimoLinha = existeSt ? icmsSTItem : despesasPorLinha;
             let qLote = parseFloat(item.qtdLote) || 1;
             if (qLote <= 0) qLote = 1;
 
-            if (elParcelaDespesa) elParcelaDespesa.innerText = formatarBR(despesasPorLinha);
+            let acrescimoLinha = 0;
+            if (temStNaNota) {
+                acrescimoLinha = parseFloat(item.icmsST) || 0;
+            } else if (temAjuste && tipoAjusteNota === 'imposto' && totalImpostoGlobal > 0) {
+                acrescimoLinha = impostoPorLinha;
+                if (elParcelaImposto) elParcelaImposto.innerText = formatarBR(impostoPorLinha);
+            }
 
-            let custoTotalLinha = vTotalCaixa + acréscimoLinha;
+            let custoTotalLinha = vTotalCaixa + acrescimoLinha;
             let custoUnitarioFinal = custoTotalLinha / qLote;
 
             if (elCustoTotalComImposto) elCustoTotalComImposto.innerText = `R$ ${formatarBR(custoTotalLinha)}`;
