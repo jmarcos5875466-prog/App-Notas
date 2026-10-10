@@ -333,6 +333,12 @@
             gap: 10px;
         }
 
+        .actions-group {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
         .btn-xml {
             background: rgba(56, 189, 248, 0.15);
             border: 1px solid rgba(56, 189, 248, 0.4);
@@ -352,6 +358,27 @@
             background: rgba(56, 189, 248, 0.25);
             border-color: #38bdf8;
             color: #7dd3fc;
+        }
+
+        .btn-fullscreen {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: #cbd5e1;
+            padding: 8px 16px;
+            border-radius: 10px;
+            font-weight: 600;
+            font-size: 13px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-fullscreen:hover {
+            background: rgba(56, 189, 248, 0.2);
+            border-color: #38bdf8;
+            color: #38bdf8;
         }
 
         .btn-limpar {
@@ -597,10 +624,18 @@
     </div>
 
     <div class="actions-bar">
-        <label class="btn-xml">
-            📄 Importar XML da Nota
-            <input type="file" id="inputXml" accept=".xml" style="display: none;" onchange="importarXML(event)">
-        </label>
+        <div class="actions-group">
+            <label class="btn-xml">
+                📄 Importar XML da Nota
+                <input type="file" id="inputXml" accept=".xml" style="display: none;" onchange="importarXML(event)">
+            </label>
+            <button class="btn-fullscreen" onclick="toggleFullscreen()" title="Alternar Tela Cheia">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"></path>
+                </svg>
+                Tela Cheia
+            </button>
+        </div>
         <button class="btn-limpar" onclick="limparTudo()">Limpar / Resetar</button>
     </div>
 
@@ -628,6 +663,18 @@
     function formatarBR(valor) {
         const num = parseFloat(valor) || 0;
         return num.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    }
+
+    function toggleFullscreen() {
+        if (!document.fullscreenElement) {
+            document.documentElement.requestFullscreen().catch(err => {
+                alert(`Erro ao tentar ativar a tela cheia: ${err.message}`);
+            });
+        } else {
+            if (document.exitFullscreen) {
+                document.exitFullscreen();
+            }
+        }
     }
 
     function garantirLinhaExistente(i) {
@@ -883,7 +930,6 @@
                     return;
                 }
 
-                // CORREÇÃO APLICADA: Redefine MAX_LINHAS com base estritamente na nova nota (mínimo de 25)
                 MAX_LINHAS = Math.max(25, itens.length);
 
                 qtdLinhasAtivas = itens.length;
