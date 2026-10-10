@@ -883,9 +883,8 @@
                     return;
                 }
 
-                if (itens.length > MAX_LINHAS) {
-                    MAX_LINHAS = itens.length;
-                }
+                // CORREÇÃO APLICADA: Redefine MAX_LINHAS com base estritamente na nova nota (mínimo de 25)
+                MAX_LINHAS = Math.max(25, itens.length);
 
                 qtdLinhasAtivas = itens.length;
                 dadosProdutos = {}; 
