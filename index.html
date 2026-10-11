@@ -13,6 +13,11 @@
             font-family: 'Inter', sans-serif;
         }
 
+        /* Reserva o espaço da barra de rolagem de forma fixa */
+        html {
+            scrollbar-gutter: stable;
+        }
+
         body {
             background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 50%, #311042 100%);
             color: #f8fafc;
@@ -21,6 +26,7 @@
             justify-content: center;
             align-items: center;
             padding: 10px;
+            overflow-y: scroll; /* Garante alinhamento central estável */
         }
 
         .app-container {
