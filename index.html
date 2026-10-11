@@ -35,14 +35,20 @@
             box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
         }
 
-        /* Cabeçalho na mesma linha */
+        /* Cabeçalho Ajustado com Botões no Canto Direito */
         header {
-            text-align: center;
             margin-bottom: 10px;
             display: flex;
             flex-direction: row;
             align-items: center;
-            justify-content: center;
+            justify-content: space-between;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .header-esquerda {
+            display: flex;
+            align-items: center;
             gap: 10px;
             flex-wrap: wrap;
         }
@@ -119,7 +125,6 @@
             color: #f87171;
         }
 
-        /* Botão Apenas com o Ícone + */
         .btn-nova-aba {
             background: rgba(56, 189, 248, 0.1);
             border: 1px dashed rgba(56, 189, 248, 0.3);
@@ -520,15 +525,14 @@
 
         .actions-bar {
             display: flex;
-            justify-content: space-between;
+            justify-content: flex-end;
             align-items: center;
             margin-bottom: 8px;
-            gap: 8px;
         }
 
         .actions-group {
             display: flex;
-            gap: 8px;
+            gap: 6px;
             flex-wrap: wrap;
         }
 
@@ -536,15 +540,15 @@
             background: rgba(56, 189, 248, 0.15);
             border: 1px solid rgba(56, 189, 248, 0.4);
             color: #38bdf8;
-            padding: 6px 12px;
-            border-radius: 8px;
+            padding: 4px 10px;
+            border-radius: 6px;
             font-weight: 600;
-            font-size: 12px;
+            font-size: 11px;
             cursor: pointer;
             transition: all 0.2s ease;
             display: inline-flex;
             align-items: center;
-            gap: 6px;
+            gap: 5px;
         }
 
         .btn-xml:hover {
@@ -553,24 +557,31 @@
             color: #7dd3fc;
         }
 
+        /* Botão de Tela Cheia com suporte ao estado ativo (azul) igual ao Importar XML */
         .btn-fullscreen {
             background: rgba(255, 255, 255, 0.05);
             border: 1px solid rgba(255, 255, 255, 0.1);
             color: #cbd5e1;
-            padding: 6px 12px;
-            border-radius: 8px;
+            padding: 4px 10px;
+            border-radius: 6px;
             font-weight: 600;
-            font-size: 12px;
+            font-size: 11px;
             cursor: pointer;
             transition: all 0.2s ease;
             display: inline-flex;
             align-items: center;
-            gap: 6px;
+            gap: 5px;
         }
 
         .btn-fullscreen:hover {
             background: rgba(56, 189, 248, 0.2);
             border-color: #38bdf8;
+            color: #38bdf8;
+        }
+
+        .btn-fullscreen.ativo {
+            background: rgba(56, 189, 248, 0.15);
+            border: 1px solid rgba(56, 189, 248, 0.4);
             color: #38bdf8;
         }
 
@@ -779,13 +790,13 @@
             .app-container { padding: 10px; }
             body { padding: 5px; }
             .grid-campos-auto { grid-template-columns: 1fr; }
-            .actions-bar { flex-direction: column; align-items: stretch; }
             .controls-panel { flex-direction: column; align-items: flex-start; }
             .toggles-group { flex-direction: column; align-items: flex-start; width: 100%; }
             .toggle-container { width: 100%; justify-content: space-between; }
             .empresa-card { flex-direction: column; align-items: flex-start; }
             .rateio-buttons { flex-direction: column; }
-            header { flex-direction: column; gap: 4px; }
+            header { flex-direction: column; align-items: flex-start; gap: 8px; }
+            .actions-group { width: 100%; justify-content: flex-start; }
         }
     </style>
 </head>
@@ -804,10 +815,26 @@
 
 <div class="app-container">
     <div id="painelControlesTopo">
-        <!-- Cabeçalho na mesma linha -->
+        <!-- Cabeçalho -->
         <header>
-            <p>Sistema Inteligente de Custos e Impostos</p>
-            <div id="relogioTopo">Carregando data e hora...</div>
+            <div class="header-esquerda">
+                <p>Sistema Inteligente de Custos e Impostos</p>
+                <div id="relogioTopo">Carregando data e hora...</div>
+            </div>
+            
+            <div class="actions-group">
+                <label class="btn-xml">
+                    📄 Importar XML da Nota
+                    <input type="file" id="inputXml" accept=".xml" style="display: none;" onchange="importarXML(event)">
+                </label>
+                <!-- Botão de Tela Cheia com ID para controle de estilo -->
+                <button id="btnTelaCheia" class="btn-fullscreen" onclick="toggleFullscreen()" title="Alternar Tela Cheia">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"></path>
+                    </svg>
+                    Tela Cheia
+                </button>
+            </div>
         </header>
 
         <!-- Barra de Abas tipo Navegador -->
@@ -938,18 +965,6 @@
         </div>
 
         <div class="actions-bar">
-            <div class="actions-group">
-                <label class="btn-xml">
-                    📄 Importar XML da Nota
-                    <input type="file" id="inputXml" accept=".xml" style="display: none;" onchange="importarXML(event)">
-                </label>
-                <button class="btn-fullscreen" onclick="toggleFullscreen()" title="Alternar Tela Cheia">
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"></path>
-                    </svg>
-                    Tela Cheia
-                </button>
-            </div>
             <button class="btn-limpar" onclick="limparTudo()">Limpar / Resetar</button>
         </div>
     </div>
@@ -1061,6 +1076,16 @@
             }
         }
     }
+
+    // Monitora alterações de tela cheia para atualizar automaticamente o botão (inclusive com a tecla ESC)
+    document.addEventListener('fullscreenchange', () => {
+        const btn = document.getElementById('btnTelaCheia');
+        if (document.fullscreenElement) {
+            btn.classList.add('ativo');
+        } else {
+            btn.classList.remove('ativo');
+        }
+    });
 
     function togglePainelSuperior() {
         const painel = document.getElementById('painelControlesTopo');
