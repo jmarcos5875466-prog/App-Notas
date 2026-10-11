@@ -913,11 +913,11 @@
                         <label>Tipo de Rateio do Acréscimo:</label>
                         <div class="rateio-buttons">
                             <div class="rateio-item active" id="btnRateioProporcional" onclick="selecionarRateio('proporcional', this)">
-                                <span class="rateio-btn-text">Proporcional (R$)</span>
+                                <span class="rateio-btn-text">Proporcional ao Valor</span>
                                 <span class="info-icon" onclick="event.stopPropagation(); mostrarExplicacao('proporcional')">ⓘ</span>
                             </div>
                             <div class="rateio-item" id="btnRateioProduto" onclick="selecionarRateio('produto', this)">
-                                <span class="rateio-btn-text">Igual por Produto</span>
+                                <span class="rateio-btn-text">Igual por Item</span>
                                 <span class="info-icon" onclick="event.stopPropagation(); mostrarExplicacao('produto')">ⓘ</span>
                             </div>
                         </div>
@@ -1290,14 +1290,14 @@
         const exemplo = document.getElementById('modalExemplo');
 
         if (tipo === 'proporcional') {
-            titulo.innerText = 'Rateio Proporcional (por Valor)';
+            titulo.innerText = 'Rateio Proporcional ao Valor';
             texto.innerText = 'O acréscimo é dividido proporcionalmente ao preço de cada produto. Quem custa mais caro na nota absorve uma parcela maior do acréscimo em reais.';
             exemplo.innerHTML = `<strong>💡 Exemplo Prático:</strong>
             Acréscimo de R$ 60,00 numa nota com 2 produtos:<br>
             • <strong>Produto A:</strong> Total R$ 150,00 (75%) ➔ Absorve <strong>R$ 45,00</strong><br>
             • <strong>Produto B:</strong> Total R$ 50,00 (25%) ➔ Absorve <strong>R$ 15,00</strong>`;
         } else if (tipo === 'produto') {
-            titulo.innerText = 'Igual por Produto (por Linha)';
+            titulo.innerText = 'Igual por Item';
             texto.innerText = 'O acréscimo total é dividido em partes exatamente iguais entre os tipos de produtos listados, sem importar o preço ou a quantidade.';
             exemplo.innerHTML = `<strong>💡 Exemplo Prático:</strong>
             Acréscimo de R$ 60,00 dividido igualmente entre 2 produtos:<br>
