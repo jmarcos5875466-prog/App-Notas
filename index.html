@@ -399,7 +399,6 @@
             color: #fca5a5;
         }
 
-        /* Estilo da barra retrátil com o botão em triângulo */
         .collapse-bar {
             width: 100%;
             height: 20px;
@@ -690,7 +689,7 @@
         </div>
     </div>
 
-    <!-- Barra Retratil com o botão em triângulo largo (exatamente onde apontou) -->
+    <!-- Barra Retratil -->
     <div class="collapse-bar" id="barraRetratil" onclick="togglePainelSuperior()" title="Ocultar / Mostrar painel superior">
         <div class="collapse-trigger">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
@@ -959,9 +958,13 @@
         return (list && list.length > 0) ? list[0].textContent.trim() : '';
     }
 
+    // FUNÇÃO CORRIGIDA: Limpa totalmente os campos antes de aplicar o novo XML
     function importarXML(event) {
         const file = event.target.files[0];
         if (!file) return;
+
+        // Limpa o nome do fornecedor/empresa imediatamente ao selecionar um novo arquivo
+        document.getElementById('nomeEmpresa').value = '';
 
         const reader = new FileReader();
         reader.onload = function(e) {
@@ -978,6 +981,8 @@
                 if (emitenteNode && emitenteNode.length > 0) {
                     nomeEmpresa = getTagText(emitenteNode[0], "xNome") || getTagText(emitenteNode[0], "xFant");
                 }
+                
+                // Define o nome obtido (ou em branco se não encontrar)
                 document.getElementById('nomeEmpresa').value = nomeEmpresa;
 
                 const icmsTotList = xmlDoc.getElementsByTagNameNS("*", "ICMSTot");
@@ -1200,7 +1205,7 @@
                 acrescimoLinha = parseFloat(item.icmsST) || 0;
             } else if (temAjuste && tipoAjusteNota === 'imposto' && totalImpostoGlobal > 0) {
                 acrescimoLinha = impostoPorLinha;
-                if (elParcelaImporto) elParcelaImporto.innerText = formatarBR(impostoPorLinha);
+                if (elParcelaImposto) elParcelaImposto.innerText = formatarBR(impostoPorLinha);
             }
 
             let custoTotalLinha = vTotalCaixa + acrescimoLinha;
