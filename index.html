@@ -33,6 +33,7 @@
             border-radius: 16px;
             padding: 15px;
             box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+            position: relative;
         }
 
         /* Cabeçalho Ajustado com Botões no Canto Direito */
@@ -787,6 +788,27 @@
 
         .btn-modal-close:hover { color: #fff; }
 
+        /* Botão OK Pequeno e Compacto */
+        .btn-alert-ok {
+            background: #38bdf8;
+            color: #0f172a;
+            border: none;
+            padding: 6px 20px;
+            border-radius: 6px;
+            font-weight: 700;
+            font-size: 12px;
+            cursor: pointer;
+            transition: all 0.2s;
+            margin-top: 15px;
+            width: auto;
+            display: inline-block;
+        }
+
+        .btn-alert-ok:hover {
+            background: #7dd3fc;
+            box-shadow: 0 0 10px rgba(56, 189, 248, 0.4);
+        }
+
         @media (max-width: 900px) {
             .nfe-detalhes-card { grid-template-columns: 1fr; }
         }
@@ -807,6 +829,15 @@
     </style>
 </head>
 <body>
+
+<!-- Modal do Alerta de Importação (Centralizado) -->
+<div class="modal-overlay" id="modalAlertaImportacao">
+    <div class="modal-card" style="text-align: center;">
+        <h4 id="alertaTitulo" style="justify-content: center; font-size: 15px; margin-bottom: 10px;"></h4>
+        <p id="alertaMensagem" style="font-size: 12px; color: #cbd5e1; margin-bottom: 5px;"></p>
+        <button class="btn-alert-ok" onclick="fecharAlertaImportacao()">OK</button>
+    </div>
+</div>
 
 <!-- Modal de Senha -->
 <div class="modal-overlay" id="modalSenha" style="display: flex;">
@@ -1006,6 +1037,22 @@
     let abaAtivaId = null;
     let contadorAbas = 0;
     let isImporting = false;
+
+    function exibirAlertaCentral(titulo, mensagem, eSucesso = true) {
+        const modal = document.getElementById('modalAlertaImportacao');
+        const elTitulo = document.getElementById('alertaTitulo');
+        const elMensagem = document.getElementById('alertaMensagem');
+
+        elTitulo.innerText = titulo;
+        elTitulo.style.color = eSucesso ? '#4ade80' : '#f87171';
+        elMensagem.innerHTML = mensagem;
+
+        modal.style.display = 'flex';
+    }
+
+    function fecharAlertaImportacao() {
+        document.getElementById('modalAlertaImportacao').style.display = 'none';
+    }
 
     function verificarSenha() {
         const senhaInput = document.getElementById('inputSenha').value;
@@ -1509,7 +1556,7 @@
                 }
 
                 if (listaProdutos.length === 0) {
-                    alert("Nenhum produto foi localizado no arquivo XML!");
+                    exibirAlertaCentral("Erro na Importação", "A nota não foi importada! Nenhum produto foi localizado no arquivo XML.", false);
                     isImporting = false;
                     return;
                 }
@@ -1532,8 +1579,11 @@
                 renderizarAbasHTML();
                 carregarAbaAtualNoDOM();
 
+                const nomeFormatado = nomeEmpresa ? `da empresa <b>${nomeEmpresa}</b>` : 'do fornecedor';
+                exibirAlertaCentral("Sucesso!", `A nota ${nomeFormatado} foi importada com sucesso!`, true);
+
             } catch (err) {
-                alert("Erro ao ler a NF-e. Verifique se é um arquivo XML válido.");
+                exibirAlertaCentral("Erro ao Importar", "A nota não foi importada. Verifique se é um arquivo XML válido.", false);
                 console.error(err);
             } finally {
                 isImporting = false;
