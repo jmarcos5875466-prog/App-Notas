@@ -405,6 +405,9 @@
 
         .campo-sub-input input:read-only {
             cursor: not-allowed;
+            background: rgba(255, 255, 255, 0.03);
+            border-color: rgba(255, 255, 255, 0.08);
+            color: #cbd5e1;
             user-select: none;
         }
 
@@ -917,22 +920,35 @@
             <div class="card-input">
                 <label>Apuração da Nota</label>
 
+                <!-- Bloco de ST Ativo (Não exibe acréscimo/desconto, apenas totais gerais e soma do ST) -->
                 <div id="blocoStTotal">
                     <label for="totalStImposto">Valor Total dos Impostos (ICMS ST)</label>
-                    <input type="text" id="totalStImposto" placeholder="0,00" readonly style="width:100%; font-size:14px; font-weight:700; background:rgba(245, 158, 11, 0.1); border:1px solid rgba(245, 158, 11, 0.3); border-radius:6px; padding:6px 10px; color:#f59e0b; margin-top: 2px;">
+                    <input type="text" id="totalStImposto" placeholder="0,00" readonly style="width:100%; font-size:14px; font-weight:700; background:rgba(245, 158, 11, 0.1); border:1px solid rgba(245, 158, 11, 0.3); border-radius:6px; padding:6px 10px; color:#f59e0b; margin-top: 2px; margin-bottom: 8px;">
+                    
+                    <div class="grid-campos-auto" style="margin-top: 6px;">
+                        <div class="campo-sub-input">
+                            <label for="valTotalNotaSt">Total Nota (R$)</label>
+                            <input type="text" id="valTotalNotaSt" placeholder="0,00" readonly tabindex="-1">
+                        </div>
+                        <div class="campo-sub-input">
+                            <label for="valTotalProdutosSt">Total Prod. (R$)</label>
+                            <input type="text" id="valTotalProdutosSt" placeholder="0,00" readonly tabindex="-1">
+                        </div>
+                    </div>
                     <span style="font-size: 10px; color: #94a3b8; display: block; margin-top: 4px;">* Soma automática dos valores de ICMS ST dos produtos</span>
                 </div>
 
+                <!-- Bloco de Imposto/Acréscimo/Desconto normal (quando não tem ST) -->
                 <div id="blocoImpostoValor" style="display: block;">
                     <div id="camposAutoImposto">
                         <div class="grid-campos-auto">
                             <div class="campo-sub-input">
                                 <label for="valTotalNota">Total Nota (R$)</label>
-                                <input type="text" id="valTotalNota" placeholder="R$ 0,00" readonly tabindex="-1">
+                                <input type="text" id="valTotalNota" placeholder="0,00" readonly tabindex="-1">
                             </div>
                             <div class="campo-sub-input">
                                 <label for="valTotalProdutos">Total Prod. (R$)</label>
-                                <input type="text" id="valTotalProdutos" placeholder="R$ 0,00" readonly tabindex="-1">
+                                <input type="text" id="valTotalProdutos" placeholder="0,00" readonly tabindex="-1">
                             </div>
                             <div class="campo-sub-input">
                                 <label for="impostoAutoResultado" id="labelResultadoAjuste">Ajuste (R$)</label>
@@ -1157,8 +1173,6 @@
             cnpjEmitente: '',
             dataEmissao: '',
             chaveAcesso: '',
-            valTotalNota: '',
-            valTotalProdutos: '',
             impostoAutoResultado: '',
             totalStImposto: '',
             margemSelecionada: null,
@@ -1272,12 +1286,17 @@
         document.getElementById('chaveAcesso').value = aba.chaveAcesso || '';
         document.getElementById('blocoDetalhesNfe').style.display = (aba.cnpjEmitente || aba.dataEmissao || aba.chaveAcesso) ? 'grid' : 'none';
         
-        // Exibição formatada dos totais (apenas leitura)
-        document.getElementById('valTotalNota').value = aba.valorNotaXMLGlobal > 0 ? formatarBR(aba.valorNotaXMLGlobal) : '';
-        document.getElementById('valTotalProdutos').value = aba.valorProdutosXMLGlobal > 0 ? formatarBR(aba.valorProdutosXMLGlobal) : '';
+        // Exibição formatada dos totais globais
+        const valNotaFormatado = aba.valorNotaXMLGlobal > 0 ? formatarBR(aba.valorNotaXMLGlobal) : '0,00';
+        const valProdFormatado = aba.valorProdutosXMLGlobal > 0 ? formatarBR(aba.valorProdutosXMLGlobal) : '0,00';
+
+        document.getElementById('valTotalNota').value = valNotaFormatado;
+        document.getElementById('valTotalProdutos').value = valProdFormatado;
+        document.getElementById('valTotalNotaSt').value = valNotaFormatado;
+        document.getElementById('valTotalProdutosSt').value = valProdFormatado;
         
-        document.getElementById('impostoAutoResultado').value = aba.impostoAutoResultado || '';
-        document.getElementById('totalStImposto').value = aba.totalStImposto || '';
+        document.getElementById('impostoAutoResultado').value = aba.impostoAutoResultado || '0,00';
+        document.getElementById('totalStImposto').value = aba.totalStImposto || '0,00';
         document.getElementById('margemCustomInput').value = aba.margemCustom || '';
         document.getElementById('toggleNomePadrao').checked = aba.toggleNome;
         document.getElementById('toggleMargemIndividualPadrao').checked = aba.toggleMargemInd;
@@ -1382,46 +1401,46 @@
         } else {
             blocoSt.style.display = 'none';
             blocoValor.style.display = 'block';
-        }
 
-        if (vNota > 0 && vProd > 0) {
-            if (vNota > vProd) {
-                aba.tipoAjusteNota = 'imposto';
-                aba.diferencaNotaGlobal = vNota - vProd;
-                impostoResultadoInput.value = formatarBR(aba.diferencaNotaGlobal);
-                impostoResultadoInput.className = 'resultado-imposto';
-                labelResultado.innerText = 'Acréscimo (R$)';
-                infoDiv.className = 'info-diferenca imposto';
-                infoDiv.style.display = 'block';
-                infoDiv.innerText = `Acréscimo apurado (R$ ${formatarBR(aba.diferencaNotaGlobal)})`;
-                blocoOpcoesRateio.style.display = 'block';
-            } else if (vNota < vProd) {
-                aba.tipoAjusteNota = 'desconto';
-                aba.diferencaNotaGlobal = vProd - vNota;
-                impostoResultadoInput.value = formatarBR(aba.diferencaNotaGlobal);
-                impostoResultadoInput.className = 'resultado-desconto';
-                labelResultado.innerText = 'Desconto (R$)';
-                infoDiv.className = 'info-diferenca desconto';
-                infoDiv.style.display = 'block';
-                infoDiv.innerText = `Desconto na Nota (R$ ${formatarBR(aba.diferencaNotaGlobal)})`;
-                blocoOpcoesRateio.style.display = 'none';
+            if (vNota > 0 && vProd > 0) {
+                if (vNota > vProd) {
+                    aba.tipoAjusteNota = 'imposto';
+                    aba.diferencaNotaGlobal = vNota - vProd;
+                    impostoResultadoInput.value = formatarBR(aba.diferencaNotaGlobal);
+                    impostoResultadoInput.className = 'resultado-imposto';
+                    labelResultado.innerText = 'Acréscimo (R$)';
+                    infoDiv.className = 'info-diferenca imposto';
+                    infoDiv.style.display = 'block';
+                    infoDiv.innerText = `Acréscimo apurado (R$ ${formatarBR(aba.diferencaNotaGlobal)})`;
+                    blocoOpcoesRateio.style.display = 'block';
+                } else if (vNota < vProd) {
+                    aba.tipoAjusteNota = 'desconto';
+                    aba.diferencaNotaGlobal = vProd - vNota;
+                    impostoResultadoInput.value = formatarBR(aba.diferencaNotaGlobal);
+                    impostoResultadoInput.className = 'resultado-desconto';
+                    labelResultado.innerText = 'Desconto (R$)';
+                    infoDiv.className = 'info-diferenca desconto';
+                    infoDiv.style.display = 'block';
+                    infoDiv.innerText = `Desconto na Nota (R$ ${formatarBR(aba.diferencaNotaGlobal)})`;
+                    blocoOpcoesRateio.style.display = 'none';
+                } else {
+                    aba.tipoAjusteNota = 'imposto';
+                    aba.diferencaNotaGlobal = 0;
+                    impostoResultadoInput.value = '0,00';
+                    impostoResultadoInput.className = 'resultado-imposto';
+                    labelResultado.innerText = 'Ajuste (R$)';
+                    infoDiv.className = 'info-diferenca';
+                    infoDiv.style.display = 'block';
+                    infoDiv.innerText = `Nota sem diferenças (Valores iguais)`;
+                    blocoOpcoesRateio.style.display = 'none';
+                }
             } else {
-                aba.tipoAjusteNota = 'imposto';
-                aba.diferencaNotaGlobal = 0;
+                infoDiv.style.display = 'none';
                 impostoResultadoInput.value = '0,00';
                 impostoResultadoInput.className = 'resultado-imposto';
-                labelResultado.innerText = 'Ajuste (R$)';
-                infoDiv.className = 'info-diferenca';
-                infoDiv.style.display = 'block';
-                infoDiv.innerText = `Nota sem diferenças (Valores iguais)`;
+                aba.diferencaNotaGlobal = 0;
                 blocoOpcoesRateio.style.display = 'none';
             }
-        } else {
-            infoDiv.style.display = 'none';
-            impostoResultadoInput.value = '';
-            impostoResultadoInput.className = 'resultado-imposto';
-            aba.diferencaNotaGlobal = 0;
-            blocoOpcoesRateio.style.display = 'none';
         }
 
         construirTabela(false);
@@ -1522,18 +1541,26 @@
                     aba.chaveAcesso = chaveNFe;
                 }
 
-                // Captura aprofundada e garantida de vNF e vProd
-                let vNFVal = '';
-                let vProdVal = '';
+                let totalNode = null;
+                let icmsTotList = xmlDoc.getElementsByTagNameNS("*", "ICMSTot");
+                if (!icmsTotList || icmsTotList.length === 0) icmsTotList = xmlDoc.getElementsByTagName("ICMSTot");
+                
+                if (icmsTotList && icmsTotList.length > 0) {
+                    totalNode = icmsTotList[0];
+                }
 
-                const elVNF = xmlDoc.getElementsByTagName("vNF");
-                if (elVNF.length > 0) vNFVal = elVNF[0].textContent;
-
-                const elVProd = xmlDoc.getElementsByTagName("vProd");
-                if (elVProd.length > 0) vProdVal = elVProd[0].textContent;
+                let vNFVal = totalNode ? getTagText(totalNode, "vNF") : '';
+                let vProdVal = totalNode ? getTagText(totalNode, "vProd") : '';
 
                 if (!vNFVal) vNFVal = extrairTagRegex(xmlText, "vNF");
-                if (!vProdVal) vProdVal = extrairTagRegex(xmlText, "vProd");
+                if (!vProdVal) {
+                    const matchICMSTot = xmlText.match(/<ICMSTot>([\s\S]*?)<\/ICMSTot>/i);
+                    if (matchICMSTot) {
+                        vProdVal = extrairTagRegex(matchICMSTot[1], "vProd");
+                    } else {
+                        vProdVal = extrairTagRegex(xmlText, "vProd");
+                    }
+                }
 
                 aba.valorNotaXMLGlobal = parseFloat(vNFVal.replace(',', '.')) || 0;
                 aba.valorProdutosXMLGlobal = parseFloat(vProdVal.replace(',', '.')) || 0;
@@ -1612,8 +1639,6 @@
         aba.cnpjEmitente = '';
         aba.dataEmissao = '';
         aba.chaveAcesso = '';
-        aba.valTotalNota = '';
-        aba.valTotalProdutos = '';
         aba.impostoAutoResultado = '';
         aba.totalStImposto = '';
         aba.margemCustom = '';
