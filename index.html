@@ -549,7 +549,6 @@
 <body>
 
 <div class="app-container">
-    <!-- Bloco Superior que será Ocultado/Mostrado -->
     <div id="painelControlesTopo">
         <header>
             <h1>Calculadora de Preços Fácil</h1>
@@ -718,6 +717,7 @@
     let valorNotaXMLGlobal = 0;
     let valorProdutosXMLGlobal = 0;
     let temStNaNota = false;
+    let isImporting = false; // TRAVA DE RESGATE: Impede re-leitura do DOM durante troca de nota
 
     function formatarBR(valor) {
         const num = parseFloat(valor) || 0;
@@ -933,6 +933,7 @@
     }
 
     function salvarDadosNaMemoria() {
+        if (isImporting) return; // SE ESTIVER IMPORTANDO, IMPEDE LER O DOM ANTIGO
         for (let i = 1; i <= MAX_LINHAS; i++) {
             garantirLinhaExistente(i);
             let elNome = document.getElementById(`nome_${i}`);
@@ -958,38 +959,65 @@
         return (list && list.length > 0) ? list[0].textContent.trim() : '';
     }
 
-    // FUNÇÃO CORRIGIDA: Limpa totalmente os campos antes de aplicar o novo XML
+    function extrairTagRegex(xmlStr, tagName) {
+        const regex = new RegExp(`<([a-zA-Z0-9_]+:)?${tagName}[^>]*>([\\s\\S]*?)<\\/([a-zA-Z0-9_]+:)?${tagName}>`, 'i');
+        const match = xmlStr.match(regex);
+        return match ? match[2].trim() : '';
+    }
+
     function importarXML(event) {
         const file = event.target.files[0];
         if (!file) return;
 
-        // Limpa o nome do fornecedor/empresa imediatamente ao selecionar um novo arquivo
+        // ATIVA BLOQUEIO CONTRA VESTÍGIOS
+        isImporting = true;
+
+        // Reset total imediato da memória e tela
+        dadosProdutos = {}; 
+        MAX_LINHAS = 25;
+        qtdLinhasAtivas = 0;
+        valorNotaXMLGlobal = 0;
+        valorProdutosXMLGlobal = 0;
+        temStNaNota = false;
+
+        document.getElementById('corpoTabela').innerHTML = ''; // Esvazia o HTML da tabela
         document.getElementById('nomeEmpresa').value = '';
+        document.getElementById('valTotalNota').value = '';
+        document.getElementById('valTotalProdutos').value = '';
+        document.getElementById('impostoAutoResultado').value = '';
+        document.getElementById('totalImposto').value = '';
+        document.getElementById('totalStImposto').value = '';
 
         const reader = new FileReader();
         reader.onload = function(e) {
             try {
+                const xmlText = e.target.result;
                 const parser = new DOMParser();
-                const xmlDoc = parser.parseFromString(e.target.result, "text/xml");
+                const xmlDoc = parser.parseFromString(xmlText, "text/xml");
 
+                // 1. Extração do Fornecedor
+                let nomeEmpresa = '';
                 let emitenteNode = xmlDoc.getElementsByTagNameNS("*", "emit");
                 if (!emitenteNode || emitenteNode.length === 0) {
                     emitenteNode = xmlDoc.getElementsByTagName("emit");
                 }
 
-                let nomeEmpresa = '';
                 if (emitenteNode && emitenteNode.length > 0) {
                     nomeEmpresa = getTagText(emitenteNode[0], "xNome") || getTagText(emitenteNode[0], "xFant");
                 }
-                
-                // Define o nome obtido (ou em branco se não encontrar)
+
+                if (!nomeEmpresa) {
+                    nomeEmpresa = extrairTagRegex(xmlText, "xNome") || extrairTagRegex(xmlText, "xFant");
+                }
+
                 document.getElementById('nomeEmpresa').value = nomeEmpresa;
 
-                const icmsTotList = xmlDoc.getElementsByTagNameNS("*", "ICMSTot");
-                const totalNode = icmsTotList.length > 0 ? icmsTotList[0] : xmlDoc;
+                // 2. Totais da Nota
+                let icmsTotList = xmlDoc.getElementsByTagNameNS("*", "ICMSTot");
+                let totalNode = icmsTotList.length > 0 ? icmsTotList[0] : xmlDoc;
 
-                const vNFVal = getTagText(totalNode, "vNF");
-                const vProdVal = getTagText(totalNode, "vProd");
+                let vNFVal = getTagText(totalNode, "vNF") || extrairTagRegex(xmlText, "vNF");
+                let vProdVal = getTagText(totalNode, "vProd") || extrairTagRegex(xmlText, "vProd");
 
                 valorNotaXMLGlobal = parseFloat(vNFVal) || 0;
                 valorProdutosXMLGlobal = parseFloat(vProdVal) || 0;
@@ -997,40 +1025,76 @@
                 document.getElementById('valTotalNota').value = valorNotaXMLGlobal ? formatarBR(valorNotaXMLGlobal) : '';
                 document.getElementById('valTotalProdutos').value = valorProdutosXMLGlobal ? formatarBR(valorProdutosXMLGlobal) : '';
 
-                let itens = xmlDoc.getElementsByTagNameNS("*", "det");
-                if (!itens || itens.length === 0) {
-                    itens = xmlDoc.getElementsByTagName("det");
+                // 3. Extração dos Produtos
+                let listaProdutos = [];
+
+                let itensDOM = xmlDoc.getElementsByTagNameNS("*", "det");
+                if (!itensDOM || itensDOM.length === 0) {
+                    itensDOM = xmlDoc.getElementsByTagName("det");
                 }
 
-                if (itens.length === 0) {
-                    alert("Nenhum produto encontrado no XML!");
+                if (itensDOM && itensDOM.length > 0) {
+                    Array.from(itensDOM).forEach(item => {
+                        let prodList = item.getElementsByTagNameNS("*", "prod");
+                        let prodNode = prodList.length > 0 ? prodList[0] : item;
+
+                        let xProd = getTagText(prodNode, "xProd");
+                        let vProdItem = getTagText(prodNode, "vProd");
+                        let qCom = getTagText(prodNode, "qCom") || "1";
+                        let vICMSST = getTagText(item, "vICMSST");
+
+                        if (xProd) {
+                            listaProdutos.push({
+                                nome: xProd,
+                                valorTotal: vProdItem ? parseFloat(vProdItem).toFixed(2) : '0.00',
+                                icmsST: vICMSST ? parseFloat(vICMSST).toFixed(2) : '0.00',
+                                qtdLote: qCom ? parseFloat(qCom).toString() : '1'
+                            });
+                        }
+                    });
+                }
+
+                if (listaProdutos.length === 0) {
+                    const detBlocks = xmlText.match(/<([a-zA-Z0-9_]+:)?det[\s\S]*?<\/([a-zA-Z0-9_]+:)?det>/gi);
+                    if (detBlocks) {
+                        detBlocks.forEach(block => {
+                            let xProd = extrairTagRegex(block, "xProd");
+                            let vProdItem = extrairTagRegex(block, "vProd");
+                            let qCom = extrairTagRegex(block, "qCom") || "1";
+                            let vICMSST = extrairTagRegex(block, "vICMSST");
+
+                            if (xProd) {
+                                listaProdutos.push({
+                                    nome: xProd,
+                                    valorTotal: vProdItem ? parseFloat(vProdItem).toFixed(2) : '0.00',
+                                    icmsST: vICMSST ? parseFloat(vICMSST).toFixed(2) : '0.00',
+                                    qtdLote: qCom ? parseFloat(qCom).toString() : '1'
+                                });
+                            }
+                        });
+                    }
+                }
+
+                if (listaProdutos.length === 0) {
+                    alert("Nenhum produto foi localizado no arquivo XML!");
+                    isImporting = false;
                     return;
                 }
 
-                MAX_LINHAS = Math.max(25, itens.length);
+                MAX_LINHAS = Math.max(25, listaProdutos.length);
+                qtdLinhasAtivas = listaProdutos.length;
 
-                qtdLinhasAtivas = itens.length;
-                dadosProdutos = {}; 
-                temStNaNota = false;
-
-                Array.from(itens).forEach((item, index) => {
+                listaProdutos.forEach((prod, index) => {
                     const i = index + 1;
-                    garantirLinhaExistente(i);
+                    dadosProdutos[i] = {
+                        nome: prod.nome,
+                        valorTotal: prod.valorTotal,
+                        icmsST: prod.icmsST,
+                        qtdLote: prod.qtdLote,
+                        margem: ''
+                    };
 
-                    const prodList = item.getElementsByTagNameNS("*", "prod");
-                    const prodNode = prodList.length > 0 ? prodList[0] : item;
-
-                    const xProd = getTagText(prodNode, "xProd");
-                    const vProdItem = getTagText(prodNode, "vProd");
-                    const qCom = getTagText(prodNode, "qCom") || "1";
-                    const vICMSST = getTagText(item, "vICMSST");
-
-                    dadosProdutos[i].nome = xProd;
-                    dadosProdutos[i].valorTotal = vProdItem ? parseFloat(vProdItem).toFixed(2) : '';
-                    dadosProdutos[i].icmsST = vICMSST ? parseFloat(vICMSST).toFixed(2) : '';
-                    dadosProdutos[i].qtdLote = qCom ? parseFloat(qCom).toString() : '1';
-
-                    if (parseFloat(vICMSST) > 0) {
+                    if (parseFloat(prod.icmsST) > 0) {
                         temStNaNota = true;
                     }
                 });
@@ -1039,8 +1103,11 @@
                 construirTabela(false);
 
             } catch (err) {
-                alert("Erro ao ler o arquivo XML. Certifique-se de que é uma NF-e válida.");
+                alert("Erro ao ler a NF-e. Verifique se é um arquivo XML válido.");
                 console.error(err);
+            } finally {
+                // LIBERA A SALVAGUARDA DE DADOS APÓS CONCLUSÃO
+                isImporting = false;
             }
         };
 
@@ -1049,6 +1116,7 @@
     }
 
     function limparTudo() {
+        isImporting = true;
         MAX_LINHAS = 25;
         qtdLinhasAtivas = 0;
         tipoAjusteNota = 'imposto';
@@ -1076,10 +1144,11 @@
         alternarModoImposto('auto');
         verificarImposto('nao', false);
         construirTabela(false);
+        isImporting = false;
     }
 
     function construirTabela(deveSalvarDOM = true) {
-        if (deveSalvarDOM) {
+        if (deveSalvarDOM && !isImporting) {
             salvarDadosNaMemoria();
         }
 
@@ -1160,7 +1229,9 @@
     }
 
     function atualizarCalculos() {
-        salvarDadosNaMemoria();
+        if (!isImporting) {
+            salvarDadosNaMemoria();
+        }
 
         const margemIndividual = document.getElementById('toggleMargemIndividual').checked;
 
