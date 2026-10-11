@@ -36,7 +36,6 @@
             position: relative;
         }
 
-        /* Cabeçalho Ajustado com Botões no Canto Direito */
         header {
             margin-bottom: 10px;
             display: flex;
@@ -71,7 +70,6 @@
             border-radius: 4px;
         }
 
-        /* Sistema de Abas Tipo Navegador */
         .browser-tabs-bar {
             display: flex;
             align-items: center;
@@ -403,6 +401,11 @@
             padding: 4px 6px;
             color: #fff;
             outline: none;
+        }
+
+        .campo-sub-input input:read-only {
+            cursor: not-allowed;
+            user-select: none;
         }
 
         .campo-sub-input input.resultado-imposto {
@@ -788,7 +791,6 @@
 
         .btn-modal-close:hover { color: #fff; }
 
-        /* Botão OK Pequeno e Compacto */
         .btn-alert-ok {
             background: #38bdf8;
             color: #0f172a;
@@ -830,7 +832,7 @@
 </head>
 <body>
 
-<!-- Modal do Alerta de Importação (Centralizado) -->
+<!-- Modal do Alerta de Importação -->
 <div class="modal-overlay" id="modalAlertaImportacao">
     <div class="modal-card" style="text-align: center;">
         <h4 id="alertaTitulo" style="justify-content: center; font-size: 15px; margin-bottom: 10px;"></h4>
@@ -873,7 +875,7 @@
             </div>
         </header>
 
-        <!-- Barra de Abas tipo Navegador -->
+        <!-- Barra de Abas -->
         <div class="browser-tabs-bar" id="browserTabsBar">
             <div id="containerAbasLista" style="display: flex; gap: 6px;"></div>
             <button class="btn-nova-aba" onclick="adicionarAba()" title="Nova Nota">+</button>
@@ -926,15 +928,15 @@
                         <div class="grid-campos-auto">
                             <div class="campo-sub-input">
                                 <label for="valTotalNota">Total Nota (R$)</label>
-                                <input type="text" id="valTotalNota" placeholder="0,00" readonly style="width:100%; font-size:12px; font-weight:600; background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1); border-radius:5px; padding:4px 6px; color:#fff;">
+                                <input type="text" id="valTotalNota" placeholder="R$ 0,00" readonly tabindex="-1">
                             </div>
                             <div class="campo-sub-input">
                                 <label for="valTotalProdutos">Total Prod. (R$)</label>
-                                <input type="text" id="valTotalProdutos" placeholder="0,00" readonly style="width:100%; font-size:12px; font-weight:600; background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1); border-radius:5px; padding:4px 6px; color:#fff;">
+                                <input type="text" id="valTotalProdutos" placeholder="R$ 0,00" readonly tabindex="-1">
                             </div>
                             <div class="campo-sub-input">
                                 <label for="impostoAutoResultado" id="labelResultadoAjuste">Ajuste (R$)</label>
-                                <input type="text" id="impostoAutoResultado" class="resultado-imposto" placeholder="0,00" readonly>
+                                <input type="text" id="impostoAutoResultado" class="resultado-imposto" placeholder="0,00" readonly tabindex="-1">
                             </div>
                         </div>
                         <div id="infoDiferenca" class="info-diferenca"></div>
@@ -1235,8 +1237,6 @@
         aba.cnpjEmitente = document.getElementById('cnpjEmitente').value;
         aba.dataEmissao = document.getElementById('dataEmissao').value;
         aba.chaveAcesso = document.getElementById('chaveAcesso').value;
-        aba.valTotalNota = document.getElementById('valTotalNota').value;
-        aba.valTotalProdutos = document.getElementById('valTotalProdutos').value;
         aba.impostoAutoResultado = document.getElementById('impostoAutoResultado').value;
         aba.totalStImposto = document.getElementById('totalStImposto').value;
         aba.margemCustom = document.getElementById('margemCustomInput').value;
@@ -1272,8 +1272,10 @@
         document.getElementById('chaveAcesso').value = aba.chaveAcesso || '';
         document.getElementById('blocoDetalhesNfe').style.display = (aba.cnpjEmitente || aba.dataEmissao || aba.chaveAcesso) ? 'grid' : 'none';
         
-        document.getElementById('valTotalNota').value = aba.valTotalNota || '';
-        document.getElementById('valTotalProdutos').value = aba.valTotalProdutos || '';
+        // Exibição formatada dos totais (apenas leitura)
+        document.getElementById('valTotalNota').value = aba.valorNotaXMLGlobal > 0 ? formatarBR(aba.valorNotaXMLGlobal) : '';
+        document.getElementById('valTotalProdutos').value = aba.valorProdutosXMLGlobal > 0 ? formatarBR(aba.valorProdutosXMLGlobal) : '';
+        
         document.getElementById('impostoAutoResultado').value = aba.impostoAutoResultado || '';
         document.getElementById('totalStImposto').value = aba.totalStImposto || '';
         document.getElementById('margemCustomInput').value = aba.margemCustom || '';
@@ -1520,15 +1522,21 @@
                     aba.chaveAcesso = chaveNFe;
                 }
 
-                let icmsTotList = xmlDoc.getElementsByTagNameNS("*", "ICMSTot");
-                if (!icmsTotList || icmsTotList.length === 0) icmsTotList = xmlDoc.getElementsByTagName("ICMSTot");
-                let totalNode = icmsTotList.length > 0 ? icmsTotList[0] : xmlDoc;
+                // Captura aprofundada e garantida de vNF e vProd
+                let vNFVal = '';
+                let vProdVal = '';
 
-                let vNFVal = getTagText(totalNode, "vNF") || extrairTagRegex(xmlText, "vNF");
-                let vProdVal = getTagText(totalNode, "vProd") || extrairTagRegex(xmlText, "vProd");
+                const elVNF = xmlDoc.getElementsByTagName("vNF");
+                if (elVNF.length > 0) vNFVal = elVNF[0].textContent;
 
-                aba.valorNotaXMLGlobal = parseFloat(vNFVal) || 0;
-                aba.valorProdutosXMLGlobal = parseFloat(vProdVal) || 0;
+                const elVProd = xmlDoc.getElementsByTagName("vProd");
+                if (elVProd.length > 0) vProdVal = elVProd[0].textContent;
+
+                if (!vNFVal) vNFVal = extrairTagRegex(xmlText, "vNF");
+                if (!vProdVal) vProdVal = extrairTagRegex(xmlText, "vProd");
+
+                aba.valorNotaXMLGlobal = parseFloat(vNFVal.replace(',', '.')) || 0;
+                aba.valorProdutosXMLGlobal = parseFloat(vProdVal.replace(',', '.')) || 0;
 
                 let listaProdutos = [];
                 let itensDOM = xmlDoc.getElementsByTagNameNS("*", "det");
