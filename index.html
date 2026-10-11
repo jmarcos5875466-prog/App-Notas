@@ -329,7 +329,7 @@
 
         .rateio-item {
             flex: 1;
-            min-width: 110px;
+            min-width: 130px;
             display: flex;
             align-items: center;
             background: rgba(255, 255, 255, 0.05);
@@ -710,7 +710,6 @@
             background: rgba(255, 255, 255, 0.12);
         }
 
-        /* Estilo específico para o Valor Total (somente leitura) */
         .input-custo-readonly {
             background: rgba(255, 255, 255, 0.03);
             border: 1px solid rgba(255, 255, 255, 0.08);
@@ -920,10 +919,6 @@
                             <div class="rateio-item" id="btnRateioProduto" onclick="selecionarRateio('produto', this)">
                                 <span class="rateio-btn-text">Igual por Produto</span>
                                 <span class="info-icon" onclick="event.stopPropagation(); mostrarExplicacao('produto')">ⓘ</span>
-                            </div>
-                            <div class="rateio-item" id="btnRateioUnidade" onclick="selecionarRateio('unidade', this)">
-                                <span class="rateio-btn-text">Igual por Unidade</span>
-                                <span class="info-icon" onclick="event.stopPropagation(); mostrarExplicacao('unidade')">ⓘ</span>
                             </div>
                         </div>
                     </div>
@@ -1251,7 +1246,7 @@
 
         // Rateio botões
         document.querySelectorAll('.rateio-item').forEach(btn => btn.classList.remove('active'));
-        const rateioMap = { proporcional: 'btnRateioProporcional', produto: 'btnRateioProduto', unidade: 'btnRateioUnidade' };
+        const rateioMap = { proporcional: 'btnRateioProporcional', produto: 'btnRateioProduto' };
         if (rateioMap[aba.tipoRateioAcrecimo]) {
             document.getElementById(rateioMap[aba.tipoRateioAcrecimo])?.classList.add('active');
         }
@@ -1308,13 +1303,6 @@
             Acréscimo de R$ 60,00 dividido igualmente entre 2 produtos:<br>
             • <strong>Produto A:</strong> Recebe <strong>R$ 30,00</strong><br>
             • <strong>Produto B:</strong> Recebe <strong>R$ 30,00</strong>`;
-        } else if (tipo === 'unidade') {
-            titulo.innerText = 'Igual por Unidade (por Volume)';
-            texto.innerText = 'O acréscimo é dividido pela soma de todas as unidades da nota. Cada unidade paga exatamente a mesma quantia.';
-            exemplo.innerHTML = `<strong>💡 Exemplo Prático:</strong>
-            Acréscimo de R$ 60,00 em 12 unidades totais (R$ 5,00/un):<br>
-            • <strong>Produto A (2 un):</strong> 2 × R$ 5,00 = <strong>R$ 10,00</strong><br>
-            • <strong>Produto B (10 un):</strong> 10 × R$ 5,00 = <strong>R$ 50,00</strong>`;
         }
         modal.style.display = 'flex';
     }
@@ -1639,7 +1627,6 @@
             if (mostrarNome) {
                 linhasHTML += `<td><input type="text" id="nome_${i}" class="input-texto" value="${valNome.replace(/"/g, '&quot;')}" placeholder="Ex: Produto" oninput="salvarDadosNaMemoriaAbaAtual()"></td>`;
             }
-            // Campo de Valor Total alterado para readonly (somente leitura)
             linhasHTML += `<td><input type="text" id="total_${i}" class="input-custo input-custo-readonly" value="${valTotal}" readonly></td>`;
             
             if (aba.temStNaNota) {
@@ -1677,13 +1664,10 @@
 
         let somaStGlobal = 0;
         let somaProdutosAtual = 0;
-        let somaQtdTotalGlobal = 0;
 
         for (let i = 1; i <= aba.qtdLinhasAtivas; i++) {
             somaStGlobal += parseFloat(aba.dadosProdutos[i]?.icmsST) || 0;
             somaProdutosAtual += parseFloat(aba.dadosProdutos[i]?.valorTotal) || 0;
-            let q = parseFloat(aba.dadosProdutos[i]?.qtdLote) || 1;
-            somaQtdTotalGlobal += q > 0 ? q : 1;
         }
 
         if (aba.temStNaNota) {
@@ -1710,9 +1694,6 @@
                     alteracaoLinha = aba.diferencaNotaGlobal * proporcao;
                 } else if (aba.tipoRateioAcrecimo === 'produto') {
                     alteracaoLinha = aba.diferencaNotaGlobal / aba.qtdLinhasAtivas;
-                } else if (aba.tipoRateioAcrecimo === 'unidade') {
-                    const valorPorUnidade = somaQtdTotalGlobal > 0 ? (aba.diferencaNotaGlobal / somaQtdTotalGlobal) : 0;
-                    alteracaoLinha = valorPorUnidade * qLote;
                 }
                 if (elParcelaAjuste) elParcelaAjuste.innerText = `R$ ${formatarBR(alteracaoLinha)}`;
             }
