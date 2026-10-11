@@ -833,9 +833,6 @@
                     📄 Importar XML da Nota
                     <input type="file" id="inputXml" accept=".xml" style="display: none;" onchange="importarXML(event)">
                 </label>
-                <button class="btn-xml" onclick="abrirDanfeOficialAPI()" style="background: rgba(34, 197, 94, 0.15); border-color: rgba(34, 197, 94, 0.4); color: #4ade80;">
-                    📄 Visualizar DANFE (PDF Oficial)
-                </button>
                 <button id="btnTelaCheia" class="btn-fullscreen" onclick="toggleFullscreen()" title="Alternar Tela Cheia">
                     <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                         <path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"></path>
@@ -1126,8 +1123,7 @@
             toggleNome: true,
             toggleMargemInd: false,
             dadosProdutos: {},
-            qtdLinhasAtivas: 0,
-            arquivoXmlBruto: null
+            qtdLinhasAtivas: 0
         };
     }
 
@@ -1257,44 +1253,6 @@
 
         calcularImpostoAuto();
         isImporting = false;
-    }
-
-    async function abrirDanfeOficialAPI() {
-        const aba = getAbaAtual();
-        if (!aba || !aba.arquivoXmlBruto) {
-            alert('Por favor, importe o arquivo XML da nota nesta aba primeiro.');
-            return;
-        }
-
-        const formData = new FormData();
-        formData.append("xml", aba.arquivoXmlBruto);
-        formData.append("format", "pdf");
-
-        const btnEl = event.target;
-        const textoOriginal = btnEl.innerText;
-        btnEl.innerText = 'Gerando PDF Oficial...';
-
-        try {
-            const resposta = await fetch("https://consultadanfe.com/api/v1/danfe", {
-                method: "POST",
-                body: formData
-            });
-
-            if (resposta.ok) {
-                const blob = await resposta.blob();
-                const urlPdf = window.URL.createObjectURL(blob);
-                window.open(urlPdf, '_blank');
-            } else {
-                const errorCode = resposta.headers.get('X-Error-Code') || 'erro_desconhecido';
-                const erroJson = await resposta.json().catch(() => ({}));
-                alert(`Erro ao gerar o DANFE (${errorCode}): ` + (erroJson.message || 'Falha na requisição.'));
-            }
-        } catch (erro) {
-            console.error("Erro na conexão:", erro);
-            alert("Não foi possível conectar ao serviço de DANFE. Verifique sua conexão com a internet.");
-        } finally {
-            btnEl.innerText = textoOriginal;
-        }
     }
 
     function garantirLinhaExistente(i) {
@@ -1471,7 +1429,6 @@
         if (!aba) return;
 
         isImporting = true;
-        aba.arquivoXmlBruto = file; // Salva o XML bruto para envio na API
         aba.dadosProdutos = {};
         aba.qtdLinhasAtivas = 0;
         aba.valorNotaXMLGlobal = 0;
@@ -1613,7 +1570,6 @@
         aba.dadosProdutos = {};
         aba.qtdLinhasAtivas = 0;
         aba.margemSelecionada = null;
-        aba.arquivoXmlBruto = null;
 
         document.querySelectorAll('.margin-btn').forEach(btn => btn.classList.remove('active'));
         document.getElementById('blocoMargemCustom').style.display = 'none';
