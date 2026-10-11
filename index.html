@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Calculadora de Preços Fácil</title>
+    <title>Calculadora de Preços Fácil - Com Abas</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
         * {
@@ -35,19 +35,21 @@
             box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
         }
 
+        /* Cabeçalho na mesma linha */
         header {
             text-align: center;
-            margin-bottom: 12px;
+            margin-bottom: 10px;
             display: flex;
-            flex-direction: column;
+            flex-direction: row;
             align-items: center;
             justify-content: center;
-            gap: 4px;
+            gap: 10px;
+            flex-wrap: wrap;
         }
 
         header p {
             font-size: 13px;
-            font-weight: 500;
+            font-weight: 600;
             color: #94a3b8;
             letter-spacing: 0.5px;
         }
@@ -60,6 +62,85 @@
             border: 1px solid rgba(56, 189, 248, 0.2);
             padding: 2px 8px;
             border-radius: 4px;
+        }
+
+        /* Sistema de Abas Tipo Navegador */
+        .browser-tabs-bar {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 0 0 10px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+            margin-bottom: 10px;
+            overflow-x: auto;
+        }
+
+        .browser-tab {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            padding: 5px 10px;
+            border-radius: 8px;
+            font-size: 11px;
+            font-weight: 500;
+            color: #94a3b8;
+            cursor: pointer;
+            transition: all 0.2s;
+            white-space: nowrap;
+        }
+
+        .browser-tab.active {
+            background: rgba(56, 189, 248, 0.15);
+            border-color: rgba(56, 189, 248, 0.4);
+            color: #38bdf8;
+            font-weight: 600;
+        }
+
+        .browser-tab:hover:not(.active) {
+            background: rgba(255, 255, 255, 0.06);
+            color: #cbd5e1;
+        }
+
+        .tab-close {
+            font-size: 10px;
+            width: 16px;
+            height: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            transition: background 0.2s;
+        }
+
+        .tab-close:hover {
+            background: rgba(239, 68, 68, 0.3);
+            color: #f87171;
+        }
+
+        /* Botão Apenas com o Ícone + */
+        .btn-nova-aba {
+            background: rgba(56, 189, 248, 0.1);
+            border: 1px dashed rgba(56, 189, 248, 0.3);
+            color: #38bdf8;
+            width: 26px;
+            height: 26px;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+            flex-shrink: 0;
+        }
+
+        .btn-nova-aba:hover {
+            background: rgba(56, 189, 248, 0.25);
+            border-color: #38bdf8;
+            color: #7dd3fc;
         }
 
         .empresa-card {
@@ -100,14 +181,13 @@
             background: rgba(255, 255, 255, 0.08);
         }
 
-        /* Bloco de Detalhes da Nota (Alinhado em linha) */
         .nfe-detalhes-card {
             background: rgba(15, 23, 42, 0.6);
             border: 1px solid rgba(255, 255, 255, 0.08);
             border-radius: 10px;
             padding: 8px 12px;
             margin-bottom: 10px;
-            display: none; /* Só aparece ao importar XML */
+            display: none;
             grid-template-columns: 180px 140px 1fr;
             gap: 10px;
             align-items: center;
@@ -625,7 +705,6 @@
         .badge-custo { color: #38bdf8; font-weight: 600; }
         .badge-preco { color: #4ade80; font-weight: 700; font-size: 12px; }
 
-        /* Modal Explicativo / Senha */
         .modal-overlay {
             position: fixed;
             top: 0; left: 0; width: 100%; height: 100%;
@@ -706,12 +785,13 @@
             .toggle-container { width: 100%; justify-content: space-between; }
             .empresa-card { flex-direction: column; align-items: flex-start; }
             .rateio-buttons { flex-direction: column; }
+            header { flex-direction: column; gap: 4px; }
         }
     </style>
 </head>
 <body>
 
-<!-- Modal de Senha (Exibido ao iniciar) -->
+<!-- Modal de Senha -->
 <div class="modal-overlay" id="modalSenha" style="display: flex;">
     <div class="modal-card" style="text-align: center;">
         <h4 style="justify-content: center; color: #38bdf8; margin-bottom: 15px;">🔒 Acesso Restrito</h4>
@@ -724,10 +804,17 @@
 
 <div class="app-container">
     <div id="painelControlesTopo">
+        <!-- Cabeçalho na mesma linha -->
         <header>
             <p>Sistema Inteligente de Custos e Impostos</p>
             <div id="relogioTopo">Carregando data e hora...</div>
         </header>
+
+        <!-- Barra de Abas tipo Navegador -->
+        <div class="browser-tabs-bar" id="browserTabsBar">
+            <div id="containerAbasLista" style="display: flex; gap: 6px;"></div>
+            <button class="btn-nova-aba" onclick="adicionarAba()" title="Nova Nota">+</button>
+        </div>
 
         <!-- Empresa Emitente -->
         <div class="empresa-card">
@@ -735,7 +822,7 @@
             <input type="text" id="nomeEmpresa" placeholder="Nome da empresa emitente da nota..." autocomplete="off">
         </div>
 
-        <!-- Detalhes da Nota Fiscal (CNPJ, Data, Chave na mesma linha) -->
+        <!-- Detalhes da Nota Fiscal -->
         <div class="nfe-detalhes-card" id="blocoDetalhesNfe">
             <div class="nfe-campo-grupo">
                 <label>CNPJ do Emitente</label>
@@ -765,14 +852,12 @@
             <div class="card-input">
                 <label>Apuração da Nota</label>
 
-                <!-- Bloco 1: Apenas para ICMS ST do Produto -->
                 <div id="blocoStTotal">
                     <label for="totalStImposto">Valor Total dos Impostos (ICMS ST)</label>
                     <input type="text" id="totalStImposto" placeholder="0,00" readonly style="width:100%; font-size:14px; font-weight:700; background:rgba(245, 158, 11, 0.1); border:1px solid rgba(245, 158, 11, 0.3); border-radius:6px; padding:6px 10px; color:#f59e0b; margin-top: 2px;">
                     <span style="font-size: 10px; color: #94a3b8; display: block; margin-top: 4px;">* Soma automática dos valores de ICMS ST dos produtos</span>
                 </div>
 
-                <!-- Bloco 2: Para Acréscimo / Desconto (Nota x Prod) -->
                 <div id="blocoImpostoValor" style="display: block;">
                     <div id="camposAutoImposto">
                         <div class="grid-campos-auto">
@@ -792,7 +877,6 @@
                         <div id="infoDiferenca" class="info-diferenca"></div>
                     </div>
 
-                    <!-- Opções de Rateio para Acréscimo -->
                     <div id="blocoOpcoesRateio">
                         <label>Tipo de Rateio do Acréscimo:</label>
                         <div class="rateio-buttons">
@@ -831,7 +915,6 @@
                     </div>
                 </div>
 
-                <!-- Painel de Exibição Padrão -->
                 <div class="controls-panel" id="painelExibicaoPadrao" style="display: flex;">
                     <div class="controls-title">Personalizar Exibição:</div>
                     <div class="toggles-group">
@@ -898,25 +981,16 @@
             <button class="btn-modal-close" onclick="fecharModal()">✕</button>
         </h4>
         <p id="modalTexto">Texto explicativo...</p>
-        <div class="modal-exemplo" id="modalExemplo">
-            <!-- Exemplo dinâmico -->
-        </div>
+        <div class="modal-exemplo" id="modalExemplo"></div>
     </div>
 </div>
 
 <script>
-    let qtdLinhasAtivas = 0;
-    let dadosProdutos = {};
-    let margemSelecionada = null;
-    let tipoAjusteNota = 'imposto';
-    let tipoRateioAcrecimo = 'proporcional';
-    let valorNotaXMLGlobal = 0;
-    let valorProdutosXMLGlobal = 0;
-    let diferencaNotaGlobal = 0;
-    let temStNaNota = false;
+    let abas = [];
+    let abaAtivaId = null;
+    let contadorAbas = 0;
     let isImporting = false;
 
-    // Função para verificar a senha (senha padrão: 1)
     function verificarSenha() {
         const senhaInput = document.getElementById('inputSenha').value;
         if (senhaInput === '1') {
@@ -929,7 +1003,6 @@
         }
     }
 
-    // Mostrador de Data e Hora em tempo real
     function atualizarRelogio() {
         const agora = new Date();
         const opcoes = { dateStyle: 'short', timeStyle: 'medium' };
@@ -1001,14 +1074,173 @@
         }
     }
 
+    // Gestão de Abas
+    function criarObjetoAbaVazia(nome) {
+        return {
+            id: ++contadorAbas,
+            nomeTab: nome || `Nota ${contadorAbas}`,
+            nomeEmpresa: '',
+            cnpjEmitente: '',
+            dataEmissao: '',
+            chaveAcesso: '',
+            valTotalNota: '',
+            valTotalProdutos: '',
+            impostoAutoResultado: '',
+            totalStImposto: '',
+            margemSelecionada: null,
+            margemCustom: '',
+            tipoAjusteNota: 'imposto',
+            tipoRateioAcrecimo: 'proporcional',
+            temStNaNota: false,
+            valorNotaXMLGlobal: 0,
+            valorProdutosXMLGlobal: 0,
+            diferencaNotaGlobal: 0,
+            toggleNome: true,
+            toggleMargemInd: false,
+            dadosProdutos: {},
+            qtdLinhasAtivas: 0
+        };
+    }
+
+    function adicionarAba(nomePersonalizado) {
+        salvarDadosNaMemoriaAbaAtual();
+        const nova = criarObjetoAbaVazia(nomePersonalizado);
+        abas.push(nova);
+        mudarAba(nova.id);
+    }
+
+    function fecharAba(id, event) {
+        if (event) event.stopPropagation();
+        if (abas.length <= 1) {
+            limparTudo();
+            return;
+        }
+
+        const index = abas.findIndex(a => a.id === id);
+        if (index !== -1) {
+            abas.splice(index, 1);
+            if (abaAtivaId === id) {
+                const proximaAba = abas[index] || abas[abas.length - 1];
+                mudarAba(proximaAba.id);
+            } else {
+                renderizarAbasHTML();
+            }
+        }
+    }
+
+    function mudarAba(id) {
+        salvarDadosNaMemoriaAbaAtual();
+        abaAtivaId = id;
+        renderizarAbasHTML();
+        carregarAbaAtualNoDOM();
+    }
+
+    function renderizarAbasHTML() {
+        const container = document.getElementById('containerAbasLista');
+        let html = '';
+        abas.forEach(aba => {
+            const isActive = aba.id === abaAtivaId ? 'active' : '';
+            html += `
+                <div class="browser-tab ${isActive}" onclick="mudarAba(${aba.id})">
+                    <span>${aba.nomeTab}</span>
+                    <span class="tab-close" onclick="fecharAba(${aba.id}, event)" title="Fechar Aba">✕</span>
+                </div>
+            `;
+        });
+        container.innerHTML = html;
+    }
+
+    function getAbaAtual() {
+        return abas.find(a => a.id === abaAtivaId);
+    }
+
+    function salvarDadosNaMemoriaAbaAtual() {
+        if (isImporting || !abaAtivaId) return;
+        const aba = getAbaAtual();
+        if (!aba) return;
+
+        aba.nomeEmpresa = document.getElementById('nomeEmpresa').value;
+        aba.cnpjEmitente = document.getElementById('cnpjEmitente').value;
+        aba.dataEmissao = document.getElementById('dataEmissao').value;
+        aba.chaveAcesso = document.getElementById('chaveAcesso').value;
+        aba.valTotalNota = document.getElementById('valTotalNota').value;
+        aba.valTotalProdutos = document.getElementById('valTotalProdutos').value;
+        aba.impostoAutoResultado = document.getElementById('impostoAutoResultado').value;
+        aba.totalStImposto = document.getElementById('totalStImposto').value;
+        aba.margemCustom = document.getElementById('margemCustomInput').value;
+        aba.toggleNome = document.getElementById('toggleNomePadrao').checked;
+        aba.toggleMargemInd = document.getElementById('toggleMargemIndividualPadrao').checked;
+
+        for (let i = 1; i <= aba.qtdLinhasAtivas; i++) {
+            if (!aba.dadosProdutos[i]) {
+                aba.dadosProdutos[i] = { nome: '', valorTotal: '', icmsST: '', qtdLote: '', margem: '' };
+            }
+            let elNome = document.getElementById(`nome_${i}`);
+            let elTotal = document.getElementById(`total_${i}`);
+            let elIcmsST = document.getElementById(`icmsST_${i}`);
+            let elQtdLote = document.getElementById(`qtdLote_${i}`);
+            let elMargemItem = document.getElementById(`margemItem_${i}`);
+
+            if (elNome) aba.dadosProdutos[i].nome = elNome.value;
+            if (elTotal) aba.dadosProdutos[i].valorTotal = elTotal.value;
+            if (elIcmsST) aba.dadosProdutos[i].icmsST = elIcmsST.value;
+            if (elQtdLote) aba.dadosProdutos[i].qtdLote = elQtdLote.value;
+            if (elMargemItem) aba.dadosProdutos[i].margem = elMargemItem.value;
+        }
+    }
+
+    function carregarAbaAtualNoDOM() {
+        const aba = getAbaAtual();
+        if (!aba) return;
+
+        isImporting = true;
+        document.getElementById('nomeEmpresa').value = aba.nomeEmpresa || '';
+        document.getElementById('cnpjEmitente').value = aba.cnpjEmitente || '';
+        document.getElementById('dataEmissao').value = aba.dataEmissao || '';
+        document.getElementById('chaveAcesso').value = aba.chaveAcesso || '';
+        document.getElementById('blocoDetalhesNfe').style.display = (aba.cnpjEmitente || aba.dataEmissao || aba.chaveAcesso) ? 'grid' : 'none';
+        
+        document.getElementById('valTotalNota').value = aba.valTotalNota || '';
+        document.getElementById('valTotalProdutos').value = aba.valTotalProdutos || '';
+        document.getElementById('impostoAutoResultado').value = aba.impostoAutoResultado || '';
+        document.getElementById('totalStImposto').value = aba.totalStImposto || '';
+        document.getElementById('margemCustomInput').value = aba.margemCustom || '';
+        document.getElementById('toggleNomePadrao').checked = aba.toggleNome;
+        document.getElementById('toggleMargemIndividualPadrao').checked = aba.toggleMargemInd;
+
+        // Margem botões
+        document.querySelectorAll('.margin-btn').forEach(btn => btn.classList.remove('active'));
+        if (aba.margemSelecionada !== null) {
+            document.querySelectorAll('.margin-btn').forEach(btn => {
+                if (btn.innerText.includes(aba.margemSelecionada) || (aba.margemSelecionada === 'custom' && btn.innerText === 'Outra')) {
+                    btn.classList.add('active');
+                }
+            });
+        }
+        document.getElementById('blocoMargemCustom').style.display = (aba.margemSelecionada === 'custom') ? 'block' : 'none';
+
+        // Rateio botões
+        document.querySelectorAll('.rateio-item').forEach(btn => btn.classList.remove('active'));
+        const rateioMap = { proporcional: 'btnRateioProporcional', produto: 'btnRateioProduto', unidade: 'btnRateioUnidade' };
+        if (rateioMap[aba.tipoRateioAcrecimo]) {
+            document.getElementById(rateioMap[aba.tipoRateioAcrecimo])?.classList.add('active');
+        }
+
+        calcularImpostoAuto();
+        isImporting = false;
+    }
+
     function garantirLinhaExistente(i) {
-        if (!dadosProdutos[i]) {
-            dadosProdutos[i] = { nome: '', valorTotal: '', icmsST: '', qtdLote: '', margem: '' };
+        const aba = getAbaAtual();
+        if (!aba.dadosProdutos[i]) {
+            aba.dadosProdutos[i] = { nome: '', valorTotal: '', icmsST: '', qtdLote: '', margem: '' };
         }
     }
 
     function selecionarMargem(valor, el) {
-        margemSelecionada = valor;
+        const aba = getAbaAtual();
+        if (!aba) return;
+        aba.margemSelecionada = valor;
         document.querySelectorAll('.margin-btn').forEach(btn => btn.classList.remove('active'));
         if (el) el.classList.add('active');
 
@@ -1018,7 +1250,9 @@
     }
 
     function selecionarRateio(tipo, el) {
-        tipoRateioAcrecimo = tipo;
+        const aba = getAbaAtual();
+        if (!aba) return;
+        aba.tipoRateioAcrecimo = tipo;
         document.querySelectorAll('.rateio-item').forEach(btn => btn.classList.remove('active'));
         if (el) el.classList.add('active');
         atualizarCalculos();
@@ -1035,24 +1269,23 @@
             texto.innerText = 'O acréscimo é dividido proporcionalmente ao preço de cada produto. Quem custa mais caro na nota absorve uma parcela maior do acréscimo em reais.';
             exemplo.innerHTML = `<strong>💡 Exemplo Prático:</strong>
             Acréscimo de R$ 60,00 numa nota com 2 produtos:<br>
-            • <strong>Sabão Líquido 3L:</strong> Total R$ 150,00 (75% da nota) ➔ Absorve <strong>R$ 45,00</strong><br>
-            • <strong>Esponja Multiuso:</strong> Total R$ 50,00 (25% da nota) ➔ Absorve <strong>R$ 15,00</strong>`;
+            • <strong>Produto A:</strong> Total R$ 150,00 (75%) ➔ Absorve <strong>R$ 45,00</strong><br>
+            • <strong>Produto B:</strong> Total R$ 50,00 (25%) ➔ Absorve <strong>R$ 15,00</strong>`;
         } else if (tipo === 'produto') {
             titulo.innerText = 'Igual por Produto (por Linha)';
-            texto.innerText = 'O acréscimo total é dividido em partes exatamente iguais entre os tipos de produtos listados, sem importar o preço ou a quantidade de caixas.';
+            texto.innerText = 'O acréscimo total é dividido em partes exatamente iguais entre os tipos de produtos listados, sem importar o preço ou a quantidade.';
             exemplo.innerHTML = `<strong>💡 Exemplo Prático:</strong>
             Acréscimo de R$ 60,00 dividido igualmente entre 2 produtos:<br>
-            • <strong>Sabão Líquido 3L:</strong> Recebe <strong>R$ 30,00</strong> de acréscimo<br>
-            • <strong>Esponja Multiuso:</strong> Recebe <strong>R$ 30,00</strong> de acréscimo`;
+            • <strong>Produto A:</strong> Recebe <strong>R$ 30,00</strong><br>
+            • <strong>Produto B:</strong> Recebe <strong>R$ 30,00</strong>`;
         } else if (tipo === 'unidade') {
             titulo.innerText = 'Igual por Unidade (por Volume)';
-            texto.innerText = 'O acréscimo é dividido pela soma de todas as unidades da nota. Cada unidade (caixa ou pacote) paga exatamente a mesma quantia.';
+            texto.innerText = 'O acréscimo é dividido pela soma de todas as unidades da nota. Cada unidade paga exatamente a mesma quantia.';
             exemplo.innerHTML = `<strong>💡 Exemplo Prático:</strong>
             Acréscimo de R$ 60,00 em 12 unidades totais (R$ 5,00/un):<br>
-            • <strong>Sabão Líquido 3L (2 un):</strong> 2 × R$ 5,00 = <strong>R$ 10,00</strong><br>
-            • <strong>Esponja Multiuso (10 un):</strong> 10 × R$ 5,00 = <strong>R$ 50,00</strong>`;
+            • <strong>Produto A (2 un):</strong> 2 × R$ 5,00 = <strong>R$ 10,00</strong><br>
+            • <strong>Produto B (10 un):</strong> 10 × R$ 5,00 = <strong>R$ 50,00</strong>`;
         }
-
         modal.style.display = 'flex';
     }
 
@@ -1061,8 +1294,11 @@
     }
 
     function calcularImpostoAuto() {
-        const vNota = valorNotaXMLGlobal;
-        const vProd = valorProdutosXMLGlobal;
+        const aba = getAbaAtual();
+        if (!aba) return;
+
+        const vNota = aba.valorNotaXMLGlobal;
+        const vProd = aba.valorProdutosXMLGlobal;
 
         const infoDiv = document.getElementById('infoDiferenca');
         const impostoResultadoInput = document.getElementById('impostoAutoResultado');
@@ -1072,7 +1308,7 @@
         const blocoValor = document.getElementById('blocoImpostoValor');
         const blocoOpcoesRateio = document.getElementById('blocoOpcoesRateio');
 
-        if (temStNaNota) {
+        if (aba.temStNaNota) {
             blocoSt.style.display = 'block';
             blocoValor.style.display = 'none';
             blocoOpcoesRateio.style.display = 'none';
@@ -1083,28 +1319,28 @@
 
         if (vNota > 0 && vProd > 0) {
             if (vNota > vProd) {
-                tipoAjusteNota = 'imposto';
-                diferencaNotaGlobal = vNota - vProd;
-                impostoResultadoInput.value = formatarBR(diferencaNotaGlobal);
+                aba.tipoAjusteNota = 'imposto';
+                aba.diferencaNotaGlobal = vNota - vProd;
+                impostoResultadoInput.value = formatarBR(aba.diferencaNotaGlobal);
                 impostoResultadoInput.className = 'resultado-imposto';
                 labelResultado.innerText = 'Acréscimo (R$)';
                 infoDiv.className = 'info-diferenca imposto';
                 infoDiv.style.display = 'block';
-                infoDiv.innerText = `Acréscimo apurado (R$ ${formatarBR(diferencaNotaGlobal)})`;
+                infoDiv.innerText = `Acréscimo apurado (R$ ${formatarBR(aba.diferencaNotaGlobal)})`;
                 blocoOpcoesRateio.style.display = 'block';
             } else if (vNota < vProd) {
-                tipoAjusteNota = 'desconto';
-                diferencaNotaGlobal = vProd - vNota;
-                impostoResultadoInput.value = formatarBR(diferencaNotaGlobal);
+                aba.tipoAjusteNota = 'desconto';
+                aba.diferencaNotaGlobal = vProd - vNota;
+                impostoResultadoInput.value = formatarBR(aba.diferencaNotaGlobal);
                 impostoResultadoInput.className = 'resultado-desconto';
                 labelResultado.innerText = 'Desconto (R$)';
                 infoDiv.className = 'info-diferenca desconto';
                 infoDiv.style.display = 'block';
-                infoDiv.innerText = `Desconto na Nota (R$ ${formatarBR(diferencaNotaGlobal)})`;
+                infoDiv.innerText = `Desconto na Nota (R$ ${formatarBR(aba.diferencaNotaGlobal)})`;
                 blocoOpcoesRateio.style.display = 'none';
             } else {
-                tipoAjusteNota = 'imposto';
-                diferencaNotaGlobal = 0;
+                aba.tipoAjusteNota = 'imposto';
+                aba.diferencaNotaGlobal = 0;
                 impostoResultadoInput.value = '0,00';
                 impostoResultadoInput.className = 'resultado-imposto';
                 labelResultado.innerText = 'Ajuste (R$)';
@@ -1117,7 +1353,7 @@
             infoDiv.style.display = 'none';
             impostoResultadoInput.value = '';
             impostoResultadoInput.className = 'resultado-imposto';
-            diferencaNotaGlobal = 0;
+            aba.diferencaNotaGlobal = 0;
             blocoOpcoesRateio.style.display = 'none';
         }
 
@@ -1125,33 +1361,17 @@
     }
 
     function sincronizarToggle(el) {
-        const estado = el.checked;
-        document.getElementById('toggleNomePadrao').checked = estado;
+        const aba = getAbaAtual();
+        if (aba) aba.toggleNome = el.checked;
+        document.getElementById('toggleNomePadrao').checked = el.checked;
         construirTabela(true);
     }
 
     function sincronizarToggleMargem(el) {
-        const estado = el.checked;
-        document.getElementById('toggleMargemIndividualPadrao').checked = estado;
+        const aba = getAbaAtual();
+        if (aba) aba.toggleMargemInd = el.checked;
+        document.getElementById('toggleMargemIndividualPadrao').checked = el.checked;
         construirTabela(true);
-    }
-
-    function salvarDadosNaMemoria() {
-        if (isImporting) return;
-        for (let i = 1; i <= qtdLinhasAtivas; i++) {
-            garantirLinhaExistente(i);
-            let elNome = document.getElementById(`nome_${i}`);
-            let elTotal = document.getElementById(`total_${i}`);
-            let elIcmsST = document.getElementById(`icmsST_${i}`);
-            let elQtdLote = document.getElementById(`qtdLote_${i}`);
-            let elMargemItem = document.getElementById(`margemItem_${i}`);
-
-            if (elNome) dadosProdutos[i].nome = elNome.value;
-            if (elTotal) dadosProdutos[i].valorTotal = elTotal.value;
-            if (elIcmsST) dadosProdutos[i].icmsST = elIcmsST.value;
-            if (elQtdLote) dadosProdutos[i].qtdLote = elQtdLote.value;
-            if (elMargemItem) dadosProdutos[i].margem = elMargemItem.value;
-        }
     }
 
     function getTagText(element, tagName) {
@@ -1174,16 +1394,12 @@
         if (!infNFe || infNFe.length === 0) infNFe = xmlDoc.getElementsByTagName("infNFe");
         if (infNFe && infNFe.length > 0) {
             let idAttr = infNFe[0].getAttribute("Id");
-            if (idAttr) {
-                return idAttr.replace(/\D/g, '');
-            }
+            if (idAttr) return idAttr.replace(/\D/g, '');
         }
         const match = xmlStr.match(/infNFe[^\>]*Id="NFe(\d{44})"/i);
         if (match) return match[1];
-
         const matchChave = xmlStr.match(/<chNFe>(\d{44})<\/chNFe>/i);
         if (matchChave) return matchChave[1];
-
         return '';
     }
 
@@ -1191,25 +1407,16 @@
         const file = event.target.files[0];
         if (!file) return;
 
+        const aba = getAbaAtual();
+        if (!aba) return;
+
         isImporting = true;
-
-        dadosProdutos = {}; 
-        qtdLinhasAtivas = 0;
-        valorNotaXMLGlobal = 0;
-        valorProdutosXMLGlobal = 0;
-        diferencaNotaGlobal = 0;
-        temStNaNota = false;
-
-        document.getElementById('corpoTabela').innerHTML = '';
-        document.getElementById('nomeEmpresa').value = '';
-        document.getElementById('cnpjEmitente').value = '';
-        document.getElementById('dataEmissao').value = '';
-        document.getElementById('chaveAcesso').value = '';
-        document.getElementById('blocoDetalhesNfe').style.display = 'none';
-        document.getElementById('valTotalNota').value = '';
-        document.getElementById('valTotalProdutos').value = '';
-        document.getElementById('impostoAutoResultado').value = '';
-        document.getElementById('totalStImposto').value = '';
+        aba.dadosProdutos = {};
+        aba.qtdLinhasAtivas = 0;
+        aba.valorNotaXMLGlobal = 0;
+        aba.valorProdutosXMLGlobal = 0;
+        aba.diferencaNotaGlobal = 0;
+        aba.temStNaNota = false;
 
         const reader = new FileReader();
         reader.onload = function(e) {
@@ -1224,18 +1431,15 @@
 
                 let emitenteNode = xmlDoc.getElementsByTagNameNS("*", "emit");
                 if (!emitenteNode || emitenteNode.length === 0) emitenteNode = xmlDoc.getElementsByTagName("emit");
-
                 if (emitenteNode && emitenteNode.length > 0) {
                     nomeEmpresa = getTagText(emitenteNode[0], "xNome") || getTagText(emitenteNode[0], "xFant");
                     cnpjEmpresa = getTagText(emitenteNode[0], "CNPJ") || getTagText(emitenteNode[0], "CPF");
                 }
-
                 if (!nomeEmpresa) nomeEmpresa = extrairTagRegex(xmlText, "xNome") || extrairTagRegex(xmlText, "xFant");
                 if (!cnpjEmpresa) cnpjEmpresa = extrairTagRegex(xmlText, "CNPJ");
 
                 let ideNode = xmlDoc.getElementsByTagNameNS("*", "ide");
                 if (!ideNode || ideNode.length === 0) ideNode = xmlDoc.getElementsByTagName("ide");
-
                 if (ideNode && ideNode.length > 0) {
                     dataEmissao = getTagText(ideNode[0], "dhEmi") || getTagText(ideNode[0], "dEmi");
                 }
@@ -1243,13 +1447,12 @@
 
                 let chaveNFe = extrairChaveAcesso(xmlText, xmlDoc);
 
-                document.getElementById('nomeEmpresa').value = nomeEmpresa;
-                
+                aba.nomeEmpresa = nomeEmpresa;
+                aba.nomeTab = nomeEmpresa ? nomeEmpresa.substring(0, 15) + '...' : `Nota ${aba.id}`;
                 if (cnpjEmpresa || dataEmissao || chaveNFe) {
-                    document.getElementById('cnpjEmitente').value = formatarCNPJ(cnpjEmpresa);
-                    document.getElementById('dataEmissao').value = formatarData(dataEmissao);
-                    document.getElementById('chaveAcesso').value = chaveNFe;
-                    document.getElementById('blocoDetalhesNfe').style.display = 'grid';
+                    aba.cnpjEmitente = formatarCNPJ(cnpjEmpresa);
+                    aba.dataEmissao = formatarData(dataEmissao);
+                    aba.chaveAcesso = chaveNFe;
                 }
 
                 let icmsTotList = xmlDoc.getElementsByTagNameNS("*", "ICMSTot");
@@ -1259,11 +1462,8 @@
                 let vNFVal = getTagText(totalNode, "vNF") || extrairTagRegex(xmlText, "vNF");
                 let vProdVal = getTagText(totalNode, "vProd") || extrairTagRegex(xmlText, "vProd");
 
-                valorNotaXMLGlobal = parseFloat(vNFVal) || 0;
-                valorProdutosXMLGlobal = parseFloat(vProdVal) || 0;
-
-                document.getElementById('valTotalNota').value = valorNotaXMLGlobal ? formatarBR(valorNotaXMLGlobal) : '';
-                document.getElementById('valTotalProdutos').value = valorProdutosXMLGlobal ? formatarBR(valorProdutosXMLGlobal) : '';
+                aba.valorNotaXMLGlobal = parseFloat(vNFVal) || 0;
+                aba.valorProdutosXMLGlobal = parseFloat(vProdVal) || 0;
 
                 let listaProdutos = [];
                 let itensDOM = xmlDoc.getElementsByTagNameNS("*", "det");
@@ -1291,50 +1491,28 @@
                 }
 
                 if (listaProdutos.length === 0) {
-                    const detBlocks = xmlText.match(/<([a-zA-Z0-9_]+:)?det[\s\S]*?<\/([a-zA-Z0-9_]+:)?det>/gi);
-                    if (detBlocks) {
-                        detBlocks.forEach(block => {
-                            let xProd = extrairTagRegex(block, "xProd");
-                            let vProdItem = extrairTagRegex(block, "vProd");
-                            let qCom = extrairTagRegex(block, "qCom") || "1";
-                            let vICMSST = extrairTagRegex(block, "vICMSST");
-
-                            if (xProd) {
-                                listaProdutos.push({
-                                    nome: xProd,
-                                    valorTotal: vProdItem ? parseFloat(vProdItem).toFixed(2) : '0.00',
-                                    icmsST: vICMSST ? parseFloat(vICMSST).toFixed(2) : '0.00',
-                                    qtdLote: qCom ? parseFloat(qCom).toString() : '1'
-                                });
-                            }
-                        });
-                    }
-                }
-
-                if (listaProdutos.length === 0) {
                     alert("Nenhum produto foi localizado no arquivo XML!");
                     isImporting = false;
                     return;
                 }
 
-                qtdLinhasAtivas = listaProdutos.length;
-
+                aba.qtdLinhasAtivas = listaProdutos.length;
                 listaProdutos.forEach((prod, index) => {
                     const i = index + 1;
-                    dadosProdutos[i] = {
+                    aba.dadosProdutos[i] = {
                         nome: prod.nome,
                         valorTotal: prod.valorTotal,
                         icmsST: prod.icmsST,
                         qtdLote: prod.qtdLote,
                         margem: ''
                     };
-
                     if (parseFloat(prod.icmsST) > 0) {
-                        temStNaNota = true;
+                        aba.temStNaNota = true;
                     }
                 });
 
-                calcularImpostoAuto();
+                renderizarAbasHTML();
+                carregarAbaAtualNoDOM();
 
             } catch (err) {
                 alert("Erro ao ler a NF-e. Verifique se é um arquivo XML válido.");
@@ -1349,52 +1527,57 @@
     }
 
     function limparTudo() {
+        const aba = getAbaAtual();
+        if (!aba) return;
+
         isImporting = true;
-        qtdLinhasAtivas = 0;
-        tipoAjusteNota = 'imposto';
-        valorNotaXMLGlobal = 0;
-        valorProdutosXMLGlobal = 0;
-        diferencaNotaGlobal = 0;
-        temStNaNota = false;
-        
-        document.getElementById('nomeEmpresa').value = '';
-        document.getElementById('cnpjEmitente').value = '';
-        document.getElementById('dataEmissao').value = '';
-        document.getElementById('chaveAcesso').value = '';
-        document.getElementById('blocoDetalhesNfe').style.display = 'none';
-        document.getElementById('toggleNomePadrao').checked = true;
-        document.getElementById('toggleMargemIndividualPadrao').checked = false;
-        document.getElementById('margemCustomInput').value = '';
-        document.getElementById('valTotalNota').value = '';
-        document.getElementById('valTotalProdutos').value = '';
-        document.getElementById('impostoAutoResultado').value = '';
-        document.getElementById('totalStImposto').value = '';
-        document.getElementById('blocoOpcoesRateio').style.display = 'none';
+        aba.nomeTab = `Nota ${aba.id}`;
+        aba.nomeEmpresa = '';
+        aba.cnpjEmitente = '';
+        aba.dataEmissao = '';
+        aba.chaveAcesso = '';
+        aba.valTotalNota = '';
+        aba.valTotalProdutos = '';
+        aba.impostoAutoResultado = '';
+        aba.totalStImposto = '';
+        aba.margemCustom = '';
+        aba.tipoAjusteNota = 'imposto';
+        aba.tipoRateioAcrecimo = 'proporcional';
+        aba.temStNaNota = false;
+        aba.valorNotaXMLGlobal = 0;
+        aba.valorProdutosXMLGlobal = 0;
+        aba.diferencaNotaGlobal = 0;
+        aba.toggleNome = true;
+        aba.toggleMargemInd = false;
+        aba.dadosProdutos = {};
+        aba.qtdLinhasAtivas = 0;
+        aba.margemSelecionada = null;
 
-        dadosProdutos = {};
-
-        margemSelecionada = null;
         document.querySelectorAll('.margin-btn').forEach(btn => btn.classList.remove('active'));
         document.getElementById('blocoMargemCustom').style.display = 'none';
 
-        calcularImpostoAuto();
+        renderizarAbasHTML();
+        carregarAbaAtualNoDOM();
         isImporting = false;
     }
 
     function construirTabela(deveSalvarDOM = true) {
         if (deveSalvarDOM && !isImporting) {
-            salvarDadosNaMemoria();
+            salvarDadosNaMemoriaAbaAtual();
         }
 
-        const mostrarNome = document.getElementById('toggleNomePadrao').checked;
-        const margemIndividual = document.getElementById('toggleMargemIndividualPadrao').checked;
-        const mostrarColunaAcrecimo = (!temStNaNota && tipoAjusteNota === 'imposto' && diferencaNotaGlobal > 0);
+        const aba = getAbaAtual();
+        if (!aba) return;
+
+        const mostrarNome = aba.toggleNome;
+        const margemIndividual = aba.toggleMargemInd;
+        const mostrarColunaAcrecimo = (!aba.temStNaNota && aba.tipoAjusteNota === 'imposto' && aba.diferencaNotaGlobal > 0);
 
         let thHTML = '';
         if (mostrarNome) thHTML += `<th>Nome do Produto</th>`;
         thHTML += `<th>Valor Total</th>`;
         
-        if (temStNaNota) {
+        if (aba.temStNaNota) {
             thHTML += `<th>ICMS ST</th>`;
         } else if (mostrarColunaAcrecimo) {
             thHTML += `<th>Acréscimo</th>`;
@@ -1412,10 +1595,9 @@
         tbody.innerHTML = '';
 
         let linhasHTML = '';
-
-        for (let i = 1; i <= qtdLinhasAtivas; i++) {
+        for (let i = 1; i <= aba.qtdLinhasAtivas; i++) {
             garantirLinhaExistente(i);
-            let item = dadosProdutos[i];
+            let item = aba.dadosProdutos[i];
 
             let valNome = item.nome || '';
             let valTotal = item.valorTotal || '';
@@ -1424,13 +1606,12 @@
             let valMargemItem = item.margem || '';
 
             linhasHTML += `<tr>`;
-            
             if (mostrarNome) {
-                linhasHTML += `<td><input type="text" id="nome_${i}" class="input-texto" value="${valNome.replace(/"/g, '&quot;')}" placeholder="Ex: Produto" oninput="salvarDadosNaMemoria()"></td>`;
+                linhasHTML += `<td><input type="text" id="nome_${i}" class="input-texto" value="${valNome.replace(/"/g, '&quot;')}" placeholder="Ex: Produto" oninput="salvarDadosNaMemoriaAbaAtual()"></td>`;
             }
             linhasHTML += `<td><input type="number" id="total_${i}" class="input-custo" value="${valTotal}" placeholder="0,00" step="0.01" oninput="atualizarCalculos()"></td>`;
             
-            if (temStNaNota) {
+            if (aba.temStNaNota) {
                 linhasHTML += `<td><input type="number" id="icmsST_${i}" class="input-custo" value="${valIcmsST}" placeholder="0,00" step="0.01" oninput="atualizarCalculos()"></td>`;
             } else if (mostrarColunaAcrecimo) {
                 linhasHTML += `<td id="parcelaAjuste_${i}" class="badge-imposto">R$ 0,00</td>`;
@@ -1454,30 +1635,33 @@
 
     function atualizarCalculos() {
         if (!isImporting) {
-            salvarDadosNaMemoria();
+            salvarDadosNaMemoriaAbaAtual();
         }
 
-        const margemIndividual = document.getElementById('toggleMargemIndividualPadrao').checked;
-        const mostrarColunaAcrecimo = (!temStNaNota && tipoAjusteNota === 'imposto' && diferencaNotaGlobal > 0);
+        const aba = getAbaAtual();
+        if (!aba) return;
+
+        const margemIndividual = aba.toggleMargemInd;
+        const mostrarColunaAcrecimo = (!aba.temStNaNota && aba.tipoAjusteNota === 'imposto' && aba.diferencaNotaGlobal > 0);
 
         let somaStGlobal = 0;
         let somaProdutosAtual = 0;
         let somaQtdTotalGlobal = 0;
 
-        for (let i = 1; i <= qtdLinhasAtivas; i++) {
-            somaStGlobal += parseFloat(dadosProdutos[i]?.icmsST) || 0;
-            somaProdutosAtual += parseFloat(dadosProdutos[i]?.valorTotal) || 0;
-            let q = parseFloat(dadosProdutos[i]?.qtdLote) || 1;
+        for (let i = 1; i <= aba.qtdLinhasAtivas; i++) {
+            somaStGlobal += parseFloat(aba.dadosProdutos[i]?.icmsST) || 0;
+            somaProdutosAtual += parseFloat(aba.dadosProdutos[i]?.valorTotal) || 0;
+            let q = parseFloat(aba.dadosProdutos[i]?.qtdLote) || 1;
             somaQtdTotalGlobal += q > 0 ? q : 1;
         }
 
-        if (temStNaNota) {
+        if (aba.temStNaNota) {
             document.getElementById('totalStImposto').value = formatarBR(somaStGlobal);
         }
 
-        for (let i = 1; i <= qtdLinhasAtivas; i++) {
+        for (let i = 1; i <= aba.qtdLinhasAtivas; i++) {
             garantirLinhaExistente(i);
-            let item = dadosProdutos[i];
+            let item = aba.dadosProdutos[i];
 
             let elParcelaAjuste = document.getElementById(`parcelaAjuste_${i}`);
             let elCustoTotalComImposto = document.getElementById(`custoTotalComImposto_${i}`);
@@ -1489,21 +1673,21 @@
             if (qLote <= 0) qLote = 1;
 
             let alteracaoLinha = 0;
-            if (mostrarColunaAcrecimo && diferencaNotaGlobal > 0) {
-                if (tipoRateioAcrecimo === 'proporcional') {
+            if (mostrarColunaAcrecimo && aba.diferencaNotaGlobal > 0) {
+                if (aba.tipoRateioAcrecimo === 'proporcional') {
                     const proporcao = somaProdutosAtual > 0 ? (vTotalCaixa / somaProdutosAtual) : 0;
-                    alteracaoLinha = diferencaNotaGlobal * proporcao;
-                } else if (tipoRateioAcrecimo === 'produto') {
-                    alteracaoLinha = diferencaNotaGlobal / qtdLinhasAtivas;
-                } else if (tipoRateioAcrecimo === 'unidade') {
-                    const valorPorUnidade = somaQtdTotalGlobal > 0 ? (diferencaNotaGlobal / somaQtdTotalGlobal) : 0;
+                    alteracaoLinha = aba.diferencaNotaGlobal * proporcao;
+                } else if (aba.tipoRateioAcrecimo === 'produto') {
+                    alteracaoLinha = aba.diferencaNotaGlobal / aba.qtdLinhasAtivas;
+                } else if (aba.tipoRateioAcrecimo === 'unidade') {
+                    const valorPorUnidade = somaQtdTotalGlobal > 0 ? (aba.diferencaNotaGlobal / somaQtdTotalGlobal) : 0;
                     alteracaoLinha = valorPorUnidade * qLote;
                 }
                 if (elParcelaAjuste) elParcelaAjuste.innerText = `R$ ${formatarBR(alteracaoLinha)}`;
             }
 
             let custoTotalLinha = vTotalCaixa;
-            if (temStNaNota) {
+            if (aba.temStNaNota) {
                 custoTotalLinha += (parseFloat(item.icmsST) || 0);
             } else if (mostrarColunaAcrecimo) {
                 custoTotalLinha += alteracaoLinha;
@@ -1518,10 +1702,10 @@
             if (margemIndividual && item.margem !== '') {
                 pct = parseFloat(item.margem) || 0;
             } else {
-                if (margemSelecionada === 'custom') {
+                if (aba.margemSelecionada === 'custom') {
                     pct = parseFloat(document.getElementById('margemCustomInput').value) || 0;
-                } else if (margemSelecionada !== null) {
-                    pct = parseFloat(margemSelecionada) || 0;
+                } else if (aba.margemSelecionada !== null) {
+                    pct = parseFloat(aba.margemSelecionada) || 0;
                 }
             }
 
@@ -1531,7 +1715,7 @@
     }
 
     window.onload = () => {
-        construirTabela(false);
+        adicionarAba('Nota 1');
         atualizarRelogio();
         document.getElementById('inputSenha').focus();
     };
