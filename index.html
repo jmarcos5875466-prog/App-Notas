@@ -618,7 +618,7 @@
         .collapse-bar {
             width: 100%;
             height: 16px;
-            display: flex;
+            display: none; /* Oculto por padrão, gerencia via JS */
             justify-content: center;
             align-items: center;
             cursor: pointer;
@@ -1676,6 +1676,17 @@
         const aba = getAbaAtual();
         if (!aba) return;
 
+        // Controla a visibilidade da barra retrátil do triângulo dependendo se há produtos importados
+        const barraRetratil = document.getElementById('barraRetratil');
+        if (aba.qtdLinhasAtivas > 0) {
+            barraRetratil.style.display = 'flex';
+        } else {
+            barraRetratil.style.display = 'none';
+            // Garante que se limpar, o painel superior volte a aparecer aberto
+            document.getElementById('painelControlesTopo').style.display = 'block';
+            barraRetratil.classList.remove('recolhido');
+        }
+
         const mostrarNome = aba.toggleNome;
         const margemIndividual = aba.toggleMargemInd;
         const mostrarColunaAcrecimo = (!aba.temStNaNota && aba.tipoAjusteNota === 'imposto' && aba.diferencaNotaGlobal > 0);
@@ -1716,10 +1727,10 @@
             if (mostrarNome) {
                 linhasHTML += `<td><input type="text" id="nome_${i}" class="input-texto" value="${valNome.replace(/"/g, '&quot;')}" placeholder="Ex: Produto" oninput="salvarDadosNaMemoriaAbaAtual()"></td>`;
             }
-            linhasHTML += `<td><input type="text" id="total_${i}" class="input-custo input-custo-readonly" value="${valTotal}" readonly></td>`;
+            linhasHTML += `<td><input type="text" id="total_${i}" class="input-custo input-custo-readonly" value="${valTotal}" readonly tabindex="-1"></td>`;
             
             if (aba.temStNaNota) {
-                linhasHTML += `<td><input type="number" id="icmsST_${i}" class="input-custo" value="${valIcmsST}" placeholder="0,00" step="0.01" oninput="atualizarCalculos()"></td>`;
+                linhasHTML += `<td><input type="text" id="icmsST_${i}" class="input-custo input-custo-readonly" value="${valIcmsST}" readonly tabindex="-1"></td>`;
             } else if (mostrarColunaAcrecimo) {
                 linhasHTML += `<td id="parcelaAjuste_${i}" class="badge-imposto">R$ 0,00</td>`;
             }
