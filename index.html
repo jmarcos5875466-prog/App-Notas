@@ -16,22 +16,22 @@
         /* Reserva o espaço da barra de rolagem de forma fixa */
         html {
             scrollbar-gutter: stable;
+            height: 100%;
         }
 
         body {
             background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 50%, #311042 100%);
             color: #f8fafc;
             min-height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            padding: 10px;
-            overflow-y: scroll; /* Garante alinhamento central estável */
+            display: block;
+            padding: 20px 10px;
+            overflow-y: auto;
         }
 
         .app-container {
             width: 100%;
             max-width: 1350px;
+            margin: 0 auto;
             background: rgba(255, 255, 255, 0.05);
             backdrop-filter: blur(16px);
             -webkit-backdrop-filter: blur(16px);
