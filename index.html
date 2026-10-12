@@ -13,6 +13,16 @@
             font-family: 'Inter', sans-serif;
         }
 
+        /* Remove as setinhas de incremento/decremento dos inputs numéricos em todos os navegadores */
+        input[type=number]::-webkit-inner-spin-button, 
+        input[type=number]::-webkit-outer-spin-button { 
+            -webkit-appearance: none; 
+            margin: 0; 
+        }
+        input[type=number] {
+            -moz-appearance: textfield;
+        }
+
         /* Reserva o espaço da barra de rolagem de forma fixa */
         html {
             scrollbar-gutter: stable;
@@ -376,6 +386,7 @@
             margin-left: 4px;
             cursor: pointer;
             transition: background 0.2s;
+            vertical-align: middle;
         }
 
         .info-icon:hover {
@@ -461,6 +472,7 @@
             align-items: center;
             justify-content: space-between;
             gap: 10px;
+            flex-wrap: wrap;
         }
 
         .controls-title {
@@ -474,19 +486,21 @@
 
         .toggles-group {
             display: flex;
-            gap: 12px;
+            gap: 6px;
             align-items: center;
+            flex-wrap: wrap;
         }
 
         .toggle-container {
-            display: flex;
+            display: inline-flex;
             align-items: center;
-            gap: 8px;
+            gap: 6px;
             background: rgba(255, 255, 255, 0.05);
             padding: 4px 8px;
             border-radius: 6px;
             border: 1px solid rgba(255, 255, 255, 0.1);
             cursor: pointer;
+            white-space: nowrap;
         }
 
         .toggle-container span {
@@ -501,6 +515,7 @@
             display: inline-block;
             width: 32px;
             height: 16px;
+            flex-shrink: 0;
         }
 
         .switch input { opacity: 0; width: 0; height: 0; }
@@ -618,7 +633,7 @@
         .collapse-bar {
             width: 100%;
             height: 16px;
-            display: none; /* Oculto por padrão, gerencia via JS */
+            display: none;
             justify-content: center;
             align-items: center;
             cursor: pointer;
@@ -704,11 +719,11 @@
             background: rgba(255, 255, 255, 0.02);
         }
 
-        .input-texto, .input-custo {
+        .input-texto, .input-custo, .input-qtd-curto {
             background: rgba(255, 255, 255, 0.07);
             border: 1px solid rgba(255, 255, 255, 0.1);
             border-radius: 6px;
-            padding: 4px 8px;
+            padding: 4px 6px;
             color: white;
             font-size: 12px;
             outline: none;
@@ -717,8 +732,9 @@
 
         .input-texto { width: 220px; }
         .input-custo { width: 80px; font-weight: 600; }
+        .input-qtd-curto { width: 65px; font-weight: 600; text-align: center; }
 
-        .input-texto:focus, .input-custo:focus {
+        .input-texto:focus, .input-custo:focus, .input-qtd-curto:focus {
             border-color: #38bdf8;
             background: rgba(255, 255, 255, 0.12);
         }
@@ -734,6 +750,7 @@
         .badge-custo-total { color: #fbbf24; font-weight: 700; }
         .badge-custo { color: #38bdf8; font-weight: 600; }
         .badge-preco { color: #4ade80; font-weight: 700; font-size: 12px; }
+        .badge-qtd-total { color: #38bdf8; font-weight: 700; font-size: 12px; text-align: center; display: block; }
 
         .modal-overlay {
             position: fixed;
@@ -829,9 +846,9 @@
             .app-container { padding: 10px; }
             body { padding: 5px; }
             .grid-campos-auto { grid-template-columns: 1fr; }
-            .controls-panel { flex-direction: column; align-items: flex-start; }
-            .toggles-group { flex-direction: column; align-items: flex-start; width: 100%; }
-            .toggle-container { width: 100%; justify-content: space-between; }
+            .controls-panel { flex-direction: row; align-items: center; justify-content: space-between; }
+            .toggles-group { flex-direction: row; flex-wrap: wrap; gap: 6px; width: auto; }
+            .toggle-container { width: auto; justify-content: flex-start; }
             .empresa-card { flex-direction: column; align-items: flex-start; }
             .rateio-buttons { flex-direction: column; }
             header { flex-direction: column; align-items: flex-start; gap: 8px; }
@@ -1015,6 +1032,13 @@
                                 <span class="slider"></span>
                             </div>
                         </label>
+                        <label class="toggle-container">
+                            <span>Unid. por Fardo/Caixa</span>
+                            <div class="switch">
+                                <input type="checkbox" id="toggleFardosPadrao" onchange="sincronizarToggleFardos(this)">
+                                <span class="slider"></span>
+                            </div>
+                        </label>
                     </div>
                 </div>
             </div>
@@ -1191,6 +1215,7 @@
             diferencaNotaGlobal: 0,
             toggleNome: true,
             toggleMargemInd: false,
+            toggleFardos: false,
             dadosProdutos: {},
             qtdLinhasAtivas: 0
         };
@@ -1262,21 +1287,24 @@
         aba.margemCustom = document.getElementById('margemCustomInput').value;
         aba.toggleNome = document.getElementById('toggleNomePadrao').checked;
         aba.toggleMargemInd = document.getElementById('toggleMargemIndividualPadrao').checked;
+        aba.toggleFardos = document.getElementById('toggleFardosPadrao').checked;
 
         for (let i = 1; i <= aba.qtdLinhasAtivas; i++) {
             if (!aba.dadosProdutos[i]) {
-                aba.dadosProdutos[i] = { nome: '', valorTotal: '', icmsST: '', qtdLote: '', margem: '' };
+                aba.dadosProdutos[i] = { nome: '', valorTotal: '', icmsST: '', qtdLote: '', unidadesPorFardo: '1', margem: '' };
             }
             let elNome = document.getElementById(`nome_${i}`);
             let elTotal = document.getElementById(`total_${i}`);
             let elIcmsST = document.getElementById(`icmsST_${i}`);
             let elQtdLote = document.getElementById(`qtdLote_${i}`);
+            let elUnidFardo = document.getElementById(`unidFardo_${i}`);
             let elMargemItem = document.getElementById(`margemItem_${i}`);
 
             if (elNome) aba.dadosProdutos[i].nome = elNome.value;
             if (elTotal) aba.dadosProdutos[i].valorTotal = elTotal.value;
             if (elIcmsST) aba.dadosProdutos[i].icmsST = elIcmsST.value;
             if (elQtdLote) aba.dadosProdutos[i].qtdLote = elQtdLote.value;
+            if (elUnidFardo) aba.dadosProdutos[i].unidadesPorFardo = elUnidFardo.value;
             if (elMargemItem) aba.dadosProdutos[i].margem = elMargemItem.value;
         }
     }
@@ -1292,7 +1320,6 @@
         document.getElementById('chaveAcesso').value = aba.chaveAcesso || '';
         document.getElementById('blocoDetalhesNfe').style.display = (aba.cnpjEmitente || aba.dataEmissao || aba.chaveAcesso) ? 'grid' : 'none';
         
-        // Exibição formatada dos totais globais
         const valNotaFormatado = aba.valorNotaXMLGlobal > 0 ? formatarBR(aba.valorNotaXMLGlobal) : '0,00';
         const valProdFormatado = aba.valorProdutosXMLGlobal > 0 ? formatarBR(aba.valorProdutosXMLGlobal) : '0,00';
 
@@ -1306,8 +1333,8 @@
         document.getElementById('margemCustomInput').value = aba.margemCustom || '';
         document.getElementById('toggleNomePadrao').checked = aba.toggleNome;
         document.getElementById('toggleMargemIndividualPadrao').checked = aba.toggleMargemInd;
+        document.getElementById('toggleFardosPadrao').checked = aba.toggleFardos;
 
-        // Margem botões
         document.querySelectorAll('.margin-btn').forEach(btn => btn.classList.remove('active'));
         if (aba.margemSelecionada !== null) {
             document.querySelectorAll('.margin-btn').forEach(btn => {
@@ -1318,7 +1345,6 @@
         }
         document.getElementById('blocoMargemCustom').style.display = (aba.margemSelecionada === 'custom') ? 'block' : 'none';
 
-        // Rateio botões
         document.querySelectorAll('.rateio-item').forEach(btn => btn.classList.remove('active'));
         const rateioMap = { proporcional: 'btnRateioProporcional', produto: 'btnRateioProduto' };
         if (rateioMap[aba.tipoRateioAcrecimo]) {
@@ -1332,7 +1358,7 @@
     function garantirLinhaExistente(i) {
         const aba = getAbaAtual();
         if (!aba.dadosProdutos[i]) {
-            aba.dadosProdutos[i] = { nome: '', valorTotal: '', icmsST: '', qtdLote: '', margem: '' };
+            aba.dadosProdutos[i] = { nome: '', valorTotal: '', icmsST: '', qtdLote: '', unidadesPorFardo: '1', margem: '' };
         }
     }
 
@@ -1377,6 +1403,13 @@
             Acréscimo de R$ 60,00 dividido igualmente entre 2 produtos:<br>
             • <strong>Produto A:</strong> Recebe <strong>R$ 30,00</strong><br>
             • <strong>Produto B:</strong> Recebe <strong>R$ 30,00</strong>`;
+        } else if (tipo === 'fardos') {
+            titulo.innerText = 'Controle de Fardos / Caixas e Unidades';
+            texto.innerText = 'Permite calcular o custo unitário por peça/unidade quando você compra produtos agrupados em fardos, caixas ou lotes fechados.';
+            exemplo.innerHTML = `<strong>💡 Exemplo Prático:</strong>
+            • <strong>Qtd. (Fd/Cx):</strong> 33 (número de fardos comprados)<br>
+            • <strong>Qtd./Lote:</strong> 6 (unidades que cada fardo contém)<br>
+            • <strong>Qtd. Total:</strong> 33 × 6 = <strong>198 unidades</strong> totais para o cálculo do custo unitário e preço de venda.`;
         }
         modal.style.display = 'flex';
     }
@@ -1463,6 +1496,13 @@
         const aba = getAbaAtual();
         if (aba) aba.toggleMargemInd = el.checked;
         document.getElementById('toggleMargemIndividualPadrao').checked = el.checked;
+        construirTabela(true);
+    }
+
+    function sincronizarToggleFardos(el) {
+        const aba = getAbaAtual();
+        if (aba) aba.toggleFardos = el.checked;
+        document.getElementById('toggleFardosPadrao').checked = el.checked;
         construirTabela(true);
     }
 
@@ -1590,7 +1630,8 @@
                                 nome: xProd,
                                 valorTotal: vProdItem ? parseFloat(vProdItem).toFixed(2) : '0.00',
                                 icmsST: vICMSST ? parseFloat(vICMSST).toFixed(2) : '0.00',
-                                qtdLote: qCom ? parseFloat(qCom).toString() : '1'
+                                qtdLote: qCom ? parseFloat(qCom).toString() : '1',
+                                unidadesPorFardo: '1'
                             });
                         }
                     });
@@ -1610,6 +1651,7 @@
                         valorTotal: prod.valorTotal,
                         icmsST: prod.icmsST,
                         qtdLote: prod.qtdLote,
+                        unidadesPorFardo: prod.unidadesPorFardo || '1',
                         margem: ''
                     };
                     if (parseFloat(prod.icmsST) > 0) {
@@ -1656,6 +1698,7 @@
         aba.diferencaNotaGlobal = 0;
         aba.toggleNome = true;
         aba.toggleMargemInd = false;
+        aba.toggleFardos = false;
         aba.dadosProdutos = {};
         aba.qtdLinhasAtivas = 0;
         aba.margemSelecionada = null;
@@ -1676,19 +1719,18 @@
         const aba = getAbaAtual();
         if (!aba) return;
 
-        // Controla a visibilidade da barra retrátil do triângulo dependendo se há produtos importados
         const barraRetratil = document.getElementById('barraRetratil');
         if (aba.qtdLinhasAtivas > 0) {
             barraRetratil.style.display = 'flex';
         } else {
             barraRetratil.style.display = 'none';
-            // Garante que se limpar, o painel superior volte a aparecer aberto
             document.getElementById('painelControlesTopo').style.display = 'block';
             barraRetratil.classList.remove('recolhido');
         }
 
         const mostrarNome = aba.toggleNome;
         const margemIndividual = aba.toggleMargemInd;
+        const mostrarFardos = aba.toggleFardos;
         const mostrarColunaAcrecimo = (!aba.temStNaNota && aba.tipoAjusteNota === 'imposto' && aba.diferencaNotaGlobal > 0);
 
         let thHTML = '';
@@ -1702,7 +1744,16 @@
         }
 
         thHTML += `<th>Custo Total</th>`;
-        thHTML += `<th>Quantidade</th>`;
+        
+        // Formatação das colunas de Quantidade com os ícones de informação ⓘ
+        if (mostrarFardos) {
+            thHTML += `<th>Qtd. (Fd/Cx) <span class="info-icon" onclick="mostrarExplicacao('fardos')" title="Como funciona">ⓘ</span></th>`;
+            thHTML += `<th>Qtd./Lote <span class="info-icon" onclick="mostrarExplicacao('fardos')" title="Como funciona">ⓘ</span></th>`;
+            thHTML += `<th>Qtd. Total <span class="info-icon" onclick="mostrarExplicacao('fardos')" title="Como funciona">ⓘ</span></th>`;
+        } else {
+            thHTML += `<th>Quantidade</th>`;
+        }
+
         thHTML += `<th>Custo Unitário</th>`;
         if (margemIndividual) thHTML += `<th>Margem (%)</th>`;
         thHTML += `<th>Preço de Venda</th>`;
@@ -1721,6 +1772,7 @@
             let valTotal = item.valorTotal || '';
             let valIcmsST = item.icmsST || '';
             let valQtd = item.qtdLote || '';
+            let valUnidFardo = item.unidadesPorFardo || '1';
             let valMargemItem = item.margem || '';
 
             linhasHTML += `<tr>`;
@@ -1736,7 +1788,15 @@
             }
 
             linhasHTML += `<td id="custoTotalComImposto_${i}" class="badge-custo-total">R$ 0,00</td>`;
-            linhasHTML += `<td><input type="number" id="qtdLote_${i}" class="input-custo" value="${valQtd}" placeholder="1" oninput="atualizarCalculos()"></td>`;
+            
+            if (mostrarFardos) {
+                linhasHTML += `<td><input type="number" id="qtdLote_${i}" class="input-qtd-curto" value="${valQtd}" placeholder="1" oninput="atualizarCalculos()"></td>`;
+                linhasHTML += `<td><input type="number" id="unidFardo_${i}" class="input-qtd-curto" value="${valUnidFardo}" placeholder="1" oninput="atualizarCalculos()"></td>`;
+                linhasHTML += `<td><span id="qtdTotalCalc_${i}" class="badge-qtd-total">1</span></td>`;
+            } else {
+                linhasHTML += `<td><input type="number" id="qtdLote_${i}" class="input-custo" value="${valQtd}" placeholder="1" oninput="atualizarCalculos()"></td>`;
+            }
+
             linhasHTML += `<td id="custoFinal_${i}" class="badge-custo">R$ 0,00</td>`;
             
             if (margemIndividual) {
@@ -1760,6 +1820,7 @@
         if (!aba) return;
 
         const margemIndividual = aba.toggleMargemInd;
+        const mostrarFardos = aba.toggleFardos;
         const mostrarColunaAcrecimo = (!aba.temStNaNota && aba.tipoAjusteNota === 'imposto' && aba.diferencaNotaGlobal > 0);
 
         let somaStGlobal = 0;
@@ -1782,10 +1843,23 @@
             let elCustoTotalComImposto = document.getElementById(`custoTotalComImposto_${i}`);
             let elCustoFinal = document.getElementById(`custoFinal_${i}`);
             let elPrecoSel = document.getElementById(`precoSel_${i}`);
+            let elQtdTotalCalc = document.getElementById(`qtdTotalCalc_${i}`);
 
             let vTotalCaixa = parseFloat(item.valorTotal) || 0;
             let qLote = parseFloat(item.qtdLote) || 1;
             if (qLote <= 0) qLote = 1;
+
+            let unidPorFardo = 1;
+            if (mostrarFardos) {
+                unidPorFardo = parseFloat(item.unidadesPorFardo) || 1;
+                if (unidPorFardo <= 0) unidPorFardo = 1;
+            }
+
+            let quantidadeTotalUnidades = qLote * unidPorFardo;
+
+            if (elQtdTotalCalc) {
+                elQtdTotalCalc.innerText = quantidadeTotalUnidades;
+            }
 
             let alteracaoLinha = 0;
             if (mostrarColunaAcrecimo && aba.diferencaNotaGlobal > 0) {
@@ -1805,7 +1879,7 @@
                 custoTotalLinha += alteracaoLinha;
             }
 
-            let custoUnitarioFinal = custoTotalLinha / qLote;
+            let custoUnitarioFinal = custoTotalLinha / quantidadeTotalUnidades;
 
             if (elCustoTotalComImposto) elCustoTotalComImposto.innerText = `R$ ${formatarBR(custoTotalLinha)}`;
             if (elCustoFinal) elCustoFinal.innerText = `R$ ${formatarBR(custoUnitarioFinal)}`;
