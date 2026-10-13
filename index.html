@@ -1055,7 +1055,7 @@
             <input type="text" id="inputChaveNFe" placeholder="Cole a chave (com ou sem espaços)..." autocomplete="off">
         </div>
 
-        <div class="button-group-baixador">
+        <div class="button-group-baixador" id="buttonGroupBaixador">
             <div class="button-group-linha">
                 <button class="btn-baixar-acao btn-pdf-acao" onclick="executarDownloadNFe('pdf')">
                     Baixar PDF
@@ -1282,6 +1282,8 @@
 
     function abrirBaixadorNFe() {
         document.getElementById('modalBaixadorNFe').style.display = 'flex';
+        document.getElementById('buttonGroupBaixador').style.display = 'flex'; // Garante que os botões aparecem ao abrir
+        document.getElementById('statusMensagemBaixador').style.display = 'none'; // Limpa mensagens anteriores
         verificarStatusApi();
     }
 
@@ -1314,7 +1316,7 @@
 
         if (!chave || chave.length !== 44) {
             statusBox.className = 'erro';
-            statusBox.innerText = 'A chave precisa de ter exatamente 44 dígitos numéricos.';
+            statusBox.innerText = 'A chave precisa ter exatamente 44 dígitos numéricos.';
             statusBox.style.display = 'block';
             return;
         }
@@ -1357,8 +1359,14 @@
                 }
             }
         } catch (err) {
+            let msg = err.message || '';
+            if (msg.includes('/api/v1/danfe') || msg.includes('antigas') || msg.includes('mes corrente')) {
+                msg = 'A consulta pública aceita apenas notas recentes do mês corrente (ou do mês anterior se hoje for antes do dia 15). Para notas mais antigas, utilize a opção de Importar XML para carregar esta nota manualmente.';
+                document.getElementById('buttonGroupBaixador').style.display = 'none'; // Oculta os 3 botões
+            }
             statusBox.className = 'erro';
-            statusBox.innerText = 'Erro: ' + err.message;
+            statusBox.innerText = msg;
+            statusBox.style.display = 'block';
         }
     }
 
@@ -1370,7 +1378,7 @@
 
         if (!chave || chave.length !== 44) {
             statusBox.className = 'erro';
-            statusBox.innerText = 'A chave precisa de ter exatamente 44 dígitos numéricos.';
+            statusBox.innerText = 'A chave precisa ter exatamente 44 dígitos numéricos.';
             statusBox.style.display = 'block';
             return;
         }
@@ -1412,8 +1420,14 @@
             fecharBaixadorNFe();
 
         } catch (err) {
+            let msg = err.message || '';
+            if (msg.includes('/api/v1/danfe') || msg.includes('antigas') || msg.includes('mes corrente')) {
+                msg = 'A consulta pública aceita apenas notas recentes do mês corrente (ou do mês anterior se hoje for antes do dia 15). Para notas mais antigas, utilize a opção de Importar XML para carregar esta nota manualmente.';
+                document.getElementById('buttonGroupBaixador').style.display = 'none'; // Oculta os 3 botões
+            }
             statusBox.className = 'erro';
-            statusBox.innerText = 'Erro: ' + err.message;
+            statusBox.innerText = msg;
+            statusBox.style.display = 'block';
         }
     }
 
