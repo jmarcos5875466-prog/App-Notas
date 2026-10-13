@@ -1044,7 +1044,7 @@
                 <a href="https://consultadanfe.com/api" target="_blank" rel="noopener noreferrer" class="btn-sobre">Sobre</a>
                 <div class="api-status-badge">
                     <div class="api-dot" id="apiDot"></div>
-                    <span id="apiStatusText">A verificar...</span>
+                    <span id="apiStatusText">Verificando...</span>
                 </div>
                 <button class="btn-modal-close" onclick="fecharBaixadorNFe()" style="margin-left: 4px;">✕</button>
             </div>
@@ -1289,6 +1289,9 @@
 
     function fecharBaixadorNFe() {
         document.getElementById('modalBaixadorNFe').style.display = 'none';
+        document.getElementById('inputChaveNFe').value = ''; // Limpa o campo da chave ao fechar
+        document.getElementById('statusMensagemBaixador').style.display = 'none';
+        document.getElementById('buttonGroupBaixador').style.display = 'flex';
     }
 
     async function verificarStatusApi() {
@@ -1322,7 +1325,7 @@
         }
 
         statusBox.className = 'sucesso';
-        statusBox.innerText = 'A consultar SEFAZ via Cloudflare, aguarde...';
+        statusBox.innerText = 'Consultando a SEFAZ via Cloudflare, aguarde...';
         statusBox.style.display = 'block';
 
         try {
@@ -1345,7 +1348,7 @@
                 if (data.pdf_base64) {
                     baixarArquivoBase64(data.pdf_base64, `DANFE_${chave}.pdf`, 'application/pdf');
                     statusBox.className = 'sucesso';
-                    statusBox.innerText = 'Sucesso! PDF descarregado.';
+                    statusBox.innerText = 'Sucesso! PDF baixado.';
                 } else {
                     throw new Error('PDF não disponível na resposta.');
                 }
@@ -1353,7 +1356,7 @@
                 if (data.xml_base64) {
                     baixarArquivoBase64(data.xml_base64, `NFe_${chave}.xml`, 'application/xml');
                     statusBox.className = 'sucesso';
-                    statusBox.innerText = 'Sucesso! XML descarregado.';
+                    statusBox.innerText = 'Sucesso! XML baixado.';
                 } else {
                     throw new Error('XML não disponível na resposta.');
                 }
@@ -1362,7 +1365,7 @@
             let msg = err.message || '';
             if (msg.includes('/api/v1/danfe') || msg.includes('antigas') || msg.includes('mes corrente')) {
                 msg = 'A consulta pública aceita apenas notas recentes do mês corrente (ou do mês anterior se hoje for antes do dia 15). Para notas mais antigas, utilize a opção de Importar XML para carregar esta nota manualmente.';
-                document.getElementById('buttonGroupBaixador').style.display = 'none'; // Oculta os 3 botões
+                document.getElementById('buttonGroupBaixador').style.display = 'none'; // Oculta os botões
             }
             statusBox.className = 'erro';
             statusBox.innerText = msg;
@@ -1384,7 +1387,7 @@
         }
 
         statusBox.className = 'sucesso';
-        statusBox.innerText = 'A consultar SEFAZ e a importar dados, aguarde...';
+        statusBox.innerText = 'Consultando a SEFAZ e importando dados, aguarde...';
         statusBox.style.display = 'block';
 
         try {
@@ -1415,15 +1418,14 @@
             // Processa os dados usando o motor central do app
             processarConteudoXML(xmlText);
 
-            // Fecha o modal e limpa a mensagem
-            statusBox.style.display = 'none';
+            // Fecha o modal (o que já limpa o campo de chave automaticamente) e limpa a mensagem
             fecharBaixadorNFe();
 
         } catch (err) {
             let msg = err.message || '';
             if (msg.includes('/api/v1/danfe') || msg.includes('antigas') || msg.includes('mes corrente')) {
                 msg = 'A consulta pública aceita apenas notas recentes do mês corrente (ou do mês anterior se hoje for antes do dia 15). Para notas mais antigas, utilize a opção de Importar XML para carregar esta nota manualmente.';
-                document.getElementById('buttonGroupBaixador').style.display = 'none'; // Oculta os 3 botões
+                document.getElementById('buttonGroupBaixador').style.display = 'none'; // Oculta os botões
             }
             statusBox.className = 'erro';
             statusBox.innerText = msg;
