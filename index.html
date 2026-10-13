@@ -622,7 +622,7 @@
         .collapse-bar {
             width: 100%;
             height: 16px;
-            display: none; /* Oculto por padrão, gerencia via JS */
+            display: none;
             justify-content: center;
             align-items: center;
             cursor: pointer;
@@ -755,7 +755,7 @@
             border: 1px solid rgba(255, 255, 255, 0.15);
             border-radius: 12px;
             padding: 18px 20px;
-            max-width: 420px;
+            max-width: 450px;
             width: 90%;
             box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
             color: #f8fafc;
@@ -824,6 +824,176 @@
             box-shadow: 0 0 10px rgba(56, 189, 248, 0.4);
         }
 
+        /* Estilos específicos para o Baixador de NF-e no Modal */
+        .header-baixador {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+            padding-bottom: 10px;
+        }
+
+        .header-baixador h2 {
+            font-size: 15px;
+            color: #38bdf8;
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 6px;
+            align-items: center;
+        }
+
+        .btn-sobre {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            padding: 3px 8px;
+            border-radius: 6px;
+            font-size: 10px;
+            font-weight: 600;
+            color: #94a3b8;
+            text-decoration: none;
+            transition: background 0.2s, color 0.2s, border-color 0.2s;
+            display: flex;
+            align-items: center;
+        }
+
+        .btn-sobre:hover {
+            background: rgba(56, 189, 248, 0.1);
+            color: #38bdf8;
+            border-color: rgba(56, 189, 248, 0.3);
+        }
+
+        .api-status-badge {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            padding: 3px 8px;
+            border-radius: 6px;
+            font-size: 10px;
+            font-weight: 600;
+            color: #94a3b8;
+        }
+
+        .api-dot {
+            width: 7px;
+            height: 7px;
+            border-radius: 50%;
+            background: #94a3b8;
+            transition: background 0.3s;
+        }
+
+        .form-group-baixador {
+            margin-bottom: 12px;
+        }
+
+        .form-group-baixador label {
+            display: block;
+            font-size: 10px;
+            font-weight: 600;
+            color: #94a3b8;
+            text-transform: uppercase;
+            margin-bottom: 5px;
+            letter-spacing: 0.5px;
+        }
+
+        .form-group-baixador input {
+            width: 100%;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            border-radius: 8px;
+            padding: 8px 10px;
+            color: #fff;
+            font-size: 12px;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        .form-group-baixador input:focus {
+            border-color: #38bdf8;
+        }
+
+        .button-group-baixador {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .button-group-linha {
+            display: flex;
+            gap: 8px;
+        }
+
+        .btn-baixar-acao {
+            flex: 1;
+            border: none;
+            border-radius: 8px;
+            padding: 10px;
+            font-weight: 700;
+            font-size: 12px;
+            cursor: pointer;
+            transition: opacity 0.2s, box-shadow 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+        }
+
+        .btn-pdf-acao {
+            background: linear-gradient(135deg, #38bdf8 0%, #0284c7 100%);
+            color: #0f172a;
+        }
+
+        .btn-pdf-acao:hover {
+            opacity: 0.9;
+            box-shadow: 0 0 15px rgba(56, 189, 248, 0.4);
+        }
+
+        .btn-xml-acao {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            color: #fff;
+        }
+
+        .btn-xml-acao:hover {
+            opacity: 0.9;
+            box-shadow: 0 0 15px rgba(16, 185, 129, 0.4);
+        }
+
+        .btn-importar-acao {
+            background: linear-gradient(135deg, #8b5cf6 0%, #6d28d9 100%);
+            color: #fff;
+            width: 100%;
+        }
+
+        .btn-importar-acao:hover {
+            opacity: 0.9;
+            box-shadow: 0 0 15px rgba(139, 92, 246, 0.4);
+        }
+
+        #statusMensagemBaixador {
+            margin-top: 12px;
+            font-size: 11px;
+            text-align: center;
+            padding: 8px;
+            border-radius: 6px;
+            display: none;
+        }
+
+        .sucesso {
+            background: rgba(34, 197, 94, 0.15);
+            color: #4ade80;
+            border: 1px solid rgba(34, 197, 94, 0.3);
+        }
+
+        .erro {
+            background: rgba(239, 68, 68, 0.15);
+            color: #f87171;
+            border: 1px solid rgba(239, 68, 68, 0.3);
+        }
+
         @media (max-width: 900px) {
             .nfe-detalhes-card { grid-template-columns: 1fr; }
         }
@@ -839,7 +1009,7 @@
             .empresa-card { flex-direction: column; align-items: flex-start; }
             .rateio-buttons { flex-direction: column; }
             header { flex-direction: column; align-items: flex-start; gap: 8px; }
-            .actions-group { width: 100%; justify-content: flex-start; }
+            .actions-group { width: 100%; justify-content: flex-start; flex-wrap: wrap; }
         }
     </style>
 </head>
@@ -865,6 +1035,44 @@
     </div>
 </div>
 
+<!-- Modal do Baixador de NF-e (PDF/XML) -->
+<div class="modal-overlay" id="modalBaixadorNFe">
+    <div class="modal-card">
+        <div class="header-baixador">
+            <h2>Baixador de NF-e</h2>
+            <div class="header-actions">
+                <a href="https://consultadanfe.com/api" target="_blank" rel="noopener noreferrer" class="btn-sobre">Sobre</a>
+                <div class="api-status-badge">
+                    <div class="api-dot" id="apiDot"></div>
+                    <span id="apiStatusText">A verificar...</span>
+                </div>
+                <button class="btn-modal-close" onclick="fecharBaixadorNFe()" style="margin-left: 4px;">✕</button>
+            </div>
+        </div>
+
+        <div class="form-group-baixador">
+            <label for="inputChaveNFe">Chave de Acesso (44 Dígitos)</label>
+            <input type="text" id="inputChaveNFe" placeholder="Cole a chave (com ou sem espaços)..." autocomplete="off">
+        </div>
+
+        <div class="button-group-baixador">
+            <div class="button-group-linha">
+                <button class="btn-baixar-acao btn-pdf-acao" onclick="executarDownloadNFe('pdf')">
+                    Baixar PDF
+                </button>
+                <button class="btn-baixar-acao btn-xml-acao" onclick="executarDownloadNFe('xml')">
+                    Baixar XML
+                </button>
+            </div>
+            <button class="btn-baixar-acao btn-importar-acao" onclick="importarDiretoPorChave()">
+                Importar Direto para o App
+            </button>
+        </div>
+
+        <div id="statusMensagemBaixador"></div>
+    </div>
+</div>
+
 <div class="app-container">
     <div id="painelControlesTopo">
         <!-- Cabeçalho -->
@@ -875,6 +1083,9 @@
             </div>
             
             <div class="actions-group">
+                <button class="btn-xml" onclick="abrirBaixadorNFe()">
+                    📥 Baixar NF-e (PDF/XML)
+                </button>
                 <label class="btn-xml">
                     📄 Importar XML da Nota
                     <input type="file" id="inputXml" accept=".xml" style="display: none;" onchange="importarXML(event)">
@@ -930,7 +1141,7 @@
             <div class="card-input">
                 <label>Apuração da Nota</label>
 
-                <!-- Bloco de ST Ativo (Não exibe acréscimo/desconto, apenas totais gerais e soma do ST) -->
+                <!-- Bloco de ST Ativo -->
                 <div id="blocoStTotal">
                     <label for="totalStImposto">Valor Total dos Impostos (ICMS ST)</label>
                     <input type="text" id="totalStImposto" placeholder="0,00" readonly style="width:100%; font-size:14px; font-weight:700; background:rgba(245, 158, 11, 0.1); border:1px solid rgba(245, 158, 11, 0.3); border-radius:6px; padding:6px 10px; color:#f59e0b; margin-top: 2px; margin-bottom: 8px;">
@@ -948,7 +1159,7 @@
                     <span style="font-size: 10px; color: #94a3b8; display: block; margin-top: 4px;">* Soma automática dos valores de ICMS ST dos produtos</span>
                 </div>
 
-                <!-- Bloco de Imposto/Acréscimo/Desconto normal (quando não tem ST) -->
+                <!-- Bloco de Imposto/Acréscimo/Desconto normal -->
                 <div id="blocoImpostoValor" style="display: block;">
                     <div id="camposAutoImposto">
                         <div class="grid-campos-auto">
@@ -1066,6 +1277,161 @@
     let contadorAbas = 0;
     let isImporting = false;
 
+    // Lógica do Baixador de NF-e
+    const WORKER_URL = 'https://royal-sun-4b63.jmarcos5875466.workers.dev';
+
+    function abrirBaixadorNFe() {
+        document.getElementById('modalBaixadorNFe').style.display = 'flex';
+        verificarStatusApi();
+    }
+
+    function fecharBaixadorNFe() {
+        document.getElementById('modalBaixadorNFe').style.display = 'none';
+    }
+
+    async function verificarStatusApi() {
+        const dot = document.getElementById('apiDot');
+        const text = document.getElementById('apiStatusText');
+        try {
+            const res = await fetch(WORKER_URL, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({})
+            });
+            dot.style.background = '#4ade80';
+            text.innerText = 'API Online';
+        } catch (err) {
+            dot.style.background = '#f87171';
+            text.innerText = 'API Offline/Bloqueada';
+        }
+    }
+
+    async function executarDownloadNFe(tipo) {
+        const chave = document.getElementById('inputChaveNFe').value.replace(/\D/g, '');
+        const statusBox = document.getElementById('statusMensagemBaixador');
+
+        statusBox.style.display = 'none';
+
+        if (!chave || chave.length !== 44) {
+            statusBox.className = 'erro';
+            statusBox.innerText = 'A chave precisa de ter exatamente 44 dígitos numéricos.';
+            statusBox.style.display = 'block';
+            return;
+        }
+
+        statusBox.className = 'sucesso';
+        statusBox.innerText = 'A consultar SEFAZ via Cloudflare, aguarde...';
+        statusBox.style.display = 'block';
+
+        try {
+            const response = await fetch(WORKER_URL, {
+                method: 'POST',
+                headers: { 
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json'
+                },
+                body: JSON.stringify({ chave: chave })
+            });
+
+            const data = await response.json();
+
+            if (!response.ok || data.status !== 'ok') {
+                throw new Error(data.message || 'Erro ao consultar a chave.');
+            }
+
+            if (tipo === 'pdf') {
+                if (data.pdf_base64) {
+                    baixarArquivoBase64(data.pdf_base64, `DANFE_${chave}.pdf`, 'application/pdf');
+                    statusBox.className = 'sucesso';
+                    statusBox.innerText = 'Sucesso! PDF descarregado.';
+                } else {
+                    throw new Error('PDF não disponível na resposta.');
+                }
+            } else if (tipo === 'xml') {
+                if (data.xml_base64) {
+                    baixarArquivoBase64(data.xml_base64, `NFe_${chave}.xml`, 'application/xml');
+                    statusBox.className = 'sucesso';
+                    statusBox.innerText = 'Sucesso! XML descarregado.';
+                } else {
+                    throw new Error('XML não disponível na resposta.');
+                }
+            }
+        } catch (err) {
+            statusBox.className = 'erro';
+            statusBox.innerText = 'Erro: ' + err.message;
+        }
+    }
+
+    async function importarDiretoPorChave() {
+        const chave = document.getElementById('inputChaveNFe').value.replace(/\D/g, '');
+        const statusBox = document.getElementById('statusMensagemBaixador');
+
+        statusBox.style.display = 'none';
+
+        if (!chave || chave.length !== 44) {
+            statusBox.className = 'erro';
+            statusBox.innerText = 'A chave precisa de ter exatamente 44 dígitos numéricos.';
+            statusBox.style.display = 'block';
+            return;
+        }
+
+        statusBox.className = 'sucesso';
+        statusBox.innerText = 'A consultar SEFAZ e a importar dados, aguarde...';
+        statusBox.style.display = 'block';
+
+        try {
+            const response = await fetch(WORKER_URL, {
+                method: 'POST',
+                headers: { 
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json'
+                },
+                body: JSON.stringify({ chave: chave })
+            });
+
+            const data = await response.json();
+
+            if (!response.ok || data.status !== 'ok') {
+                throw new Error(data.message || 'Erro ao consultar a chave.');
+            }
+
+            if (!data.xml_base64) {
+                throw new Error('XML não disponível na resposta da API.');
+            }
+
+            // Descodifica o Base64 do XML com suporte completo a UTF-8
+            const binString = atob(data.xml_base64);
+            const bytes = Uint8Array.from(binString, (m) => m.codePointAt(0));
+            const xmlText = new TextDecoder().decode(bytes);
+
+            // Processa os dados usando o motor central do app
+            processarConteudoXML(xmlText);
+
+            // Fecha o modal e limpa a mensagem
+            statusBox.style.display = 'none';
+            fecharBaixadorNFe();
+
+        } catch (err) {
+            statusBox.className = 'erro';
+            statusBox.innerText = 'Erro: ' + err.message;
+        }
+    }
+
+    function baixarArquivoBase64(base64Data, filename, contentType) {
+        const byteCharacters = atob(base64Data);
+        const byteNumbers = new Array(byteCharacters.length);
+        for (let i = 0; i < byteCharacters.length; i++) {
+            byteNumbers[i] = byteCharacters.charCodeAt(i);
+        }
+        const byteArray = new Uint8Array(byteNumbers);
+        const blob = new Blob([byteArray], { type: contentType });
+        const link = document.createElement('a');
+        link.href = window.URL.createObjectURL(blob);
+        link.download = filename;
+        link.click();
+    }
+
+    // Funções da Calculadora
     function exibirAlertaCentral(titulo, mensagem, eSucesso = true) {
         const modal = document.getElementById('modalAlertaImportacao');
         const elTitulo = document.getElementById('alertaTitulo');
@@ -1296,7 +1662,6 @@
         document.getElementById('chaveAcesso').value = aba.chaveAcesso || '';
         document.getElementById('blocoDetalhesNfe').style.display = (aba.cnpjEmitente || aba.dataEmissao || aba.chaveAcesso) ? 'grid' : 'none';
         
-        // Exibição formatada dos totais globais
         const valNotaFormatado = aba.valorNotaXMLGlobal > 0 ? formatarBR(aba.valorNotaXMLGlobal) : '0,00';
         const valProdFormatado = aba.valorProdutosXMLGlobal > 0 ? formatarBR(aba.valorProdutosXMLGlobal) : '0,00';
 
@@ -1311,7 +1676,6 @@
         document.getElementById('toggleNomePadrao').checked = aba.toggleNome;
         document.getElementById('toggleMargemIndividualPadrao').checked = aba.toggleMargemInd;
 
-        // Margem botões
         document.querySelectorAll('.margin-btn').forEach(btn => btn.classList.remove('active'));
         if (aba.margemSelecionada !== null) {
             document.querySelectorAll('.margin-btn').forEach(btn => {
@@ -1322,7 +1686,6 @@
         }
         document.getElementById('blocoMargemCustom').style.display = (aba.margemSelecionada === 'custom') ? 'block' : 'none';
 
-        // Rateio botões
         document.querySelectorAll('.rateio-item').forEach(btn => btn.classList.remove('active'));
         const rateioMap = { proporcional: 'btnRateioProporcional', produto: 'btnRateioProduto' };
         if (rateioMap[aba.tipoRateioAcrecimo]) {
@@ -1499,10 +1862,8 @@
         return '';
     }
 
-    function importarXML(event) {
-        const file = event.target.files[0];
-        if (!file) return;
-
+    // Função Central de Processamento de XML (Compartilhada entre Arquivo Local e API)
+    function processarConteudoXML(xmlText) {
         const aba = getAbaAtual();
         if (!aba) return;
 
@@ -1514,127 +1875,132 @@
         aba.diferencaNotaGlobal = 0;
         aba.temStNaNota = false;
 
-        const reader = new FileReader();
-        reader.onload = function(e) {
-            try {
-                const xmlText = e.target.result;
-                const parser = new DOMParser();
-                const xmlDoc = parser.parseFromString(xmlText, "text/xml");
+        try {
+            const parser = new DOMParser();
+            const xmlDoc = parser.parseFromString(xmlText, "text/xml");
 
-                let nomeEmpresa = '';
-                let cnpjEmpresa = '';
-                let dataEmissao = '';
+            let nomeEmpresa = '';
+            let cnpjEmpresa = '';
+            let dataEmissao = '';
 
-                let emitenteNode = xmlDoc.getElementsByTagNameNS("*", "emit");
-                if (!emitenteNode || emitenteNode.length === 0) emitenteNode = xmlDoc.getElementsByTagName("emit");
-                if (emitenteNode && emitenteNode.length > 0) {
-                    nomeEmpresa = getTagText(emitenteNode[0], "xNome") || getTagText(emitenteNode[0], "xFant");
-                    cnpjEmpresa = getTagText(emitenteNode[0], "CNPJ") || getTagText(emitenteNode[0], "CPF");
+            let emitenteNode = xmlDoc.getElementsByTagNameNS("*", "emit");
+            if (!emitenteNode || emitenteNode.length === 0) emitenteNode = xmlDoc.getElementsByTagName("emit");
+            if (emitenteNode && emitenteNode.length > 0) {
+                nomeEmpresa = getTagText(emitenteNode[0], "xNome") || getTagText(emitenteNode[0], "xFant");
+                cnpjEmpresa = getTagText(emitenteNode[0], "CNPJ") || getTagText(emitenteNode[0], "CPF");
+            }
+            if (!nomeEmpresa) nomeEmpresa = extrairTagRegex(xmlText, "xNome") || extrairTagRegex(xmlText, "xFant");
+            if (!cnpjEmpresa) cnpjEmpresa = extrairTagRegex(xmlText, "CNPJ");
+
+            let ideNode = xmlDoc.getElementsByTagNameNS("*", "ide");
+            if (!ideNode || ideNode.length === 0) ideNode = xmlDoc.getElementsByTagName("ide");
+            if (ideNode && ideNode.length > 0) {
+                dataEmissao = getTagText(ideNode[0], "dhEmi") || getTagText(ideNode[0], "dEmi");
+            }
+            if (!dataEmissao) dataEmissao = extrairTagRegex(xmlText, "dhEmi") || extrairTagRegex(xmlText, "dEmi");
+
+            let chaveNFe = extrairChaveAcesso(xmlText, xmlDoc);
+
+            aba.nomeEmpresa = nomeEmpresa;
+            aba.nomeTab = nomeEmpresa ? nomeEmpresa.substring(0, 15) + '...' : `Nota ${aba.id}`;
+            if (cnpjEmpresa || dataEmissao || chaveNFe) {
+                aba.cnpjEmitente = formatarCNPJ(cnpjEmpresa);
+                aba.dataEmissao = formatarData(dataEmissao);
+                aba.chaveAcesso = chaveNFe;
+            }
+
+            let totalNode = null;
+            let icmsTotList = xmlDoc.getElementsByTagNameNS("*", "ICMSTot");
+            if (!icmsTotList || icmsTotList.length === 0) icmsTotList = xmlDoc.getElementsByTagName("ICMSTot");
+            
+            if (icmsTotList && icmsTotList.length > 0) {
+                totalNode = icmsTotList[0];
+            }
+
+            let vNFVal = totalNode ? getTagText(totalNode, "vNF") : '';
+            let vProdVal = totalNode ? getTagText(totalNode, "vProd") : '';
+
+            if (!vNFVal) vNFVal = extrairTagRegex(xmlText, "vNF");
+            if (!vProdVal) {
+                const matchICMSTot = xmlText.match(/<ICMSTot>([\s\S]*?)<\/ICMSTot>/i);
+                if (matchICMSTot) {
+                    vProdVal = extrairTagRegex(matchICMSTot[1], "vProd");
+                } else {
+                    vProdVal = extrairTagRegex(xmlText, "vProd");
                 }
-                if (!nomeEmpresa) nomeEmpresa = extrairTagRegex(xmlText, "xNome") || extrairTagRegex(xmlText, "xFant");
-                if (!cnpjEmpresa) cnpjEmpresa = extrairTagRegex(xmlText, "CNPJ");
+            }
 
-                let ideNode = xmlDoc.getElementsByTagNameNS("*", "ide");
-                if (!ideNode || ideNode.length === 0) ideNode = xmlDoc.getElementsByTagName("ide");
-                if (ideNode && ideNode.length > 0) {
-                    dataEmissao = getTagText(ideNode[0], "dhEmi") || getTagText(ideNode[0], "dEmi");
-                }
-                if (!dataEmissao) dataEmissao = extrairTagRegex(xmlText, "dhEmi") || extrairTagRegex(xmlText, "dEmi");
+            aba.valorNotaXMLGlobal = parseFloat(vNFVal.replace(',', '.')) || 0;
+            aba.valorProdutosXMLGlobal = parseFloat(vProdVal.replace(',', '.')) || 0;
 
-                let chaveNFe = extrairChaveAcesso(xmlText, xmlDoc);
+            let listaProdutos = [];
+            let itensDOM = xmlDoc.getElementsByTagNameNS("*", "det");
+            if (!itensDOM || itensDOM.length === 0) itensDOM = xmlDoc.getElementsByTagName("det");
 
-                aba.nomeEmpresa = nomeEmpresa;
-                aba.nomeTab = nomeEmpresa ? nomeEmpresa.substring(0, 15) + '...' : `Nota ${aba.id}`;
-                if (cnpjEmpresa || dataEmissao || chaveNFe) {
-                    aba.cnpjEmitente = formatarCNPJ(cnpjEmpresa);
-                    aba.dataEmissao = formatarData(dataEmissao);
-                    aba.chaveAcesso = chaveNFe;
-                }
+            if (itensDOM && itensDOM.length > 0) {
+                Array.from(itensDOM).forEach(item => {
+                    let prodList = item.getElementsByTagNameNS("*", "prod");
+                    let prodNode = prodList.length > 0 ? prodList[0] : item;
 
-                let totalNode = null;
-                let icmsTotList = xmlDoc.getElementsByTagNameNS("*", "ICMSTot");
-                if (!icmsTotList || icmsTotList.length === 0) icmsTotList = xmlDoc.getElementsByTagName("ICMSTot");
-                
-                if (icmsTotList && icmsTotList.length > 0) {
-                    totalNode = icmsTotList[0];
-                }
+                    let xProd = getTagText(prodNode, "xProd");
+                    let vProdItem = getTagText(prodNode, "vProd");
+                    let qCom = getTagText(prodNode, "qCom") || "1";
+                    let vICMSST = getTagText(item, "vICMSST");
 
-                let vNFVal = totalNode ? getTagText(totalNode, "vNF") : '';
-                let vProdVal = totalNode ? getTagText(totalNode, "vProd") : '';
-
-                if (!vNFVal) vNFVal = extrairTagRegex(xmlText, "vNF");
-                if (!vProdVal) {
-                    const matchICMSTot = xmlText.match(/<ICMSTot>([\s\S]*?)<\/ICMSTot>/i);
-                    if (matchICMSTot) {
-                        vProdVal = extrairTagRegex(matchICMSTot[1], "vProd");
-                    } else {
-                        vProdVal = extrairTagRegex(xmlText, "vProd");
-                    }
-                }
-
-                aba.valorNotaXMLGlobal = parseFloat(vNFVal.replace(',', '.')) || 0;
-                aba.valorProdutosXMLGlobal = parseFloat(vProdVal.replace(',', '.')) || 0;
-
-                let listaProdutos = [];
-                let itensDOM = xmlDoc.getElementsByTagNameNS("*", "det");
-                if (!itensDOM || itensDOM.length === 0) itensDOM = xmlDoc.getElementsByTagName("det");
-
-                if (itensDOM && itensDOM.length > 0) {
-                    Array.from(itensDOM).forEach(item => {
-                        let prodList = item.getElementsByTagNameNS("*", "prod");
-                        let prodNode = prodList.length > 0 ? prodList[0] : item;
-
-                        let xProd = getTagText(prodNode, "xProd");
-                        let vProdItem = getTagText(prodNode, "vProd");
-                        let qCom = getTagText(prodNode, "qCom") || "1";
-                        let vICMSST = getTagText(item, "vICMSST");
-
-                        if (xProd) {
-                            listaProdutos.push({
-                                nome: xProd,
-                                valorTotal: vProdItem ? parseFloat(vProdItem).toFixed(2) : '0.00',
-                                icmsST: vICMSST ? parseFloat(vICMSST).toFixed(2) : '0.00',
-                                qtdLote: qCom ? parseFloat(qCom).toString() : '1'
-                            });
-                        }
-                    });
-                }
-
-                if (listaProdutos.length === 0) {
-                    exibirAlertaCentral("Erro na Importação", "A nota não foi importada! Nenhum produto foi localizado no arquivo XML.", false);
-                    isImporting = false;
-                    return;
-                }
-
-                aba.qtdLinhasAtivas = listaProdutos.length;
-                listaProdutos.forEach((prod, index) => {
-                    const i = index + 1;
-                    aba.dadosProdutos[i] = {
-                        nome: prod.nome,
-                        valorTotal: prod.valorTotal,
-                        icmsST: prod.icmsST,
-                        qtdLote: prod.qtdLote,
-                        margem: ''
-                    };
-                    if (parseFloat(prod.icmsST) > 0) {
-                        aba.temStNaNota = true;
+                    if (xProd) {
+                        listaProdutos.push({
+                            nome: xProd,
+                            valorTotal: vProdItem ? parseFloat(vProdItem).toFixed(2) : '0.00',
+                            icmsST: vICMSST ? parseFloat(vICMSST).toFixed(2) : '0.00',
+                            qtdLote: qCom ? parseFloat(qCom).toString() : '1'
+                        });
                     }
                 });
-
-                renderizarAbasHTML();
-                carregarAbaAtualNoDOM();
-
-                const nomeFormatado = nomeEmpresa ? `da empresa <b>${nomeEmpresa}</b>` : 'do fornecedor';
-                exibirAlertaCentral("Sucesso!", `A nota ${nomeFormatado} foi importada com sucesso!`, true);
-
-            } catch (err) {
-                exibirAlertaCentral("Erro ao Importar", "A nota não foi importada. Verifique se é um arquivo XML válido.", false);
-                console.error(err);
-            } finally {
-                isImporting = false;
             }
-        };
 
+            if (listaProdutos.length === 0) {
+                exibirAlertaCentral("Erro na Importação", "A nota não foi importada! Nenhum produto foi localizado no arquivo XML.", false);
+                isImporting = false;
+                return;
+            }
+
+            aba.qtdLinhasAtivas = listaProdutos.length;
+            listaProdutos.forEach((prod, index) => {
+                const i = index + 1;
+                aba.dadosProdutos[i] = {
+                    nome: prod.nome,
+                    valorTotal: prod.valorTotal,
+                    icmsST: prod.icmsST,
+                    qtdLote: prod.qtdLote,
+                    margem: ''
+                };
+                if (parseFloat(prod.icmsST) > 0) {
+                    aba.temStNaNota = true;
+                }
+            });
+
+            renderizarAbasHTML();
+            carregarAbaAtualNoDOM();
+
+            const nomeFormatado = nomeEmpresa ? `da empresa <b>${nomeEmpresa}</b>` : 'do fornecedor';
+            exibirAlertaCentral("Sucesso!", `A nota ${nomeFormatado} foi importada com sucesso!`, true);
+
+        } catch (err) {
+            exibirAlertaCentral("Erro ao Importar", "A nota não foi importada. Verifique se é um arquivo XML válido.", false);
+            console.error(err);
+        } finally {
+            isImporting = false;
+        }
+    }
+
+    function importarXML(event) {
+        const file = event.target.files[0];
+        if (!file) return;
+
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            processarConteudoXML(e.target.result);
+        };
         reader.readAsText(file);
         event.target.value = '';
     }
@@ -1680,13 +2046,11 @@
         const aba = getAbaAtual();
         if (!aba) return;
 
-        // Controla a visibilidade da barra retrátil do triângulo dependendo se há produtos importados
         const barraRetratil = document.getElementById('barraRetratil');
         if (aba.qtdLinhasAtivas > 0) {
             barraRetratil.style.display = 'flex';
         } else {
             barraRetratil.style.display = 'none';
-            // Garante que se limpar, o painel superior volte a aparecer aberto
             document.getElementById('painelControlesTopo').style.display = 'block';
             barraRetratil.classList.remove('recolhido');
         }
