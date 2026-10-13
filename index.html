@@ -1044,7 +1044,7 @@
                 <a href="https://consultadanfe.com/api" target="_blank" rel="noopener noreferrer" class="btn-sobre">Sobre</a>
                 <div class="api-status-badge">
                     <div class="api-dot" id="apiDot"></div>
-                    <span id="apiStatusText">Verificando...</span>
+                    <span id="apiStatusText">Pronto para uso</span>
                 </div>
                 <button class="btn-modal-close" onclick="fecharBaixadorNFe()" style="margin-left: 4px;">✕</button>
             </div>
@@ -1284,7 +1284,12 @@
         document.getElementById('modalBaixadorNFe').style.display = 'flex';
         document.getElementById('buttonGroupBaixador').style.display = 'flex'; // Garante que os botões aparecem ao abrir
         document.getElementById('statusMensagemBaixador').style.display = 'none'; // Limpa mensagens anteriores
-        verificarStatusApi();
+        
+        // Ajustado: Apenas define o status como pronto sem disparar requisição automática na abertura
+        const dot = document.getElementById('apiDot');
+        const text = document.getElementById('apiStatusText');
+        dot.style.background = '#38bdf8';
+        text.innerText = 'Pronto para uso';
     }
 
     function fecharBaixadorNFe() {
@@ -1294,6 +1299,7 @@
         document.getElementById('buttonGroupBaixador').style.display = 'flex';
     }
 
+    // Mantida caso precise testar explicitamente em outro lugar, mas removida da abertura do modal
     async function verificarStatusApi() {
         const dot = document.getElementById('apiDot');
         const text = document.getElementById('apiStatusText');
