@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Painel Admin - Senha da Calculadora</title>
+    
+    <!-- FAVICON COM A LETRA A -->
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='20' fill='%2338bdf8'/><text x='50%' y='68%' font-size='65' font-weight='bold' font-family='Arial, sans-serif' fill='%230f172a' text-anchor='middle'>A</text></svg>">
+    
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Inter', sans-serif;
+        }
+
+        html {
+            scrollbar-gutter: stable;
+            height: 100%;
+        }
+
+        body {
+            background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 50%, #311042 100%);
+            color: #f8fafc;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .admin-container {
+            width: 100%;
+            max-width: 420px;
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            border-radius: 16px;
+            padding: 25px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+            text-align: center;
+        }
+
+        h2 {
+            color: #38bdf8;
+            font-size: 18px;
+            font-weight: 700;
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        p {
+            font-size: 12px;
+            color: #94a3b8;
+            margin-bottom: 20px;
+            line-height: 1.5;
+        }
+
+        .painel-senha-atual {
+            background: rgba(56, 189, 248, 0.08);
+            border: 1px solid rgba(56, 189, 248, 0.2);
+            border-radius: 10px;
+            padding: 12px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .painel-senha-atual span {
+            display: block;
+            font-size: 10px;
+            font-weight: 600;
+            color: #94a3b8;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 4px;
+        }
+
+        .painel-senha-atual strong {
+            font-size: 18px;
+            color: #38bdf8;
+            letter-spacing: 2px;
+        }
+
+        .campo-grupo {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            text-align: left;
+            margin-bottom: 20px;
+        }
+
+        .campo-grupo label {
+            font-size: 10px;
+            font-weight: 600;
+            color: #94a3b8;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .campo-grupo input {
+            width: 100%;
+            font-size: 14px;
+            font-weight: 600;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            padding: 10px 12px;
+            color: #fff;
+            outline: none;
+            text-align: center;
+            transition: all 0.2s;
+        }
+
+        .campo-grupo input:focus {
+            border-color: #38bdf8;
+            background: rgba(255, 255, 255, 0.08);
+            box-shadow: 0 0 10px rgba(56, 189, 248, 0.2);
+        }
+
+        .btn-atualizar {
+            background: rgba(56, 189, 248, 0.2);
+            border: 1px solid rgba(56, 189, 248, 0.4);
+            color: #38bdf8;
+            width: 100%;
+            padding: 12px;
+            border-radius: 8px;
+            font-weight: 700;
+            font-size: 13px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .btn-atualizar:hover {
+            background: rgba(56, 189, 248, 0.35);
+            border-color: #38bdf8;
+            color: #7dd3fc;
+            box-shadow: 0 0 15px rgba(56, 189, 248, 0.3);
+        }
+
+        .mensagem-status {
+            margin-top: 15px;
+            font-size: 12px;
+            font-weight: 600;
+            padding: 8px;
+            border-radius: 6px;
+            display: none;
+        }
+
+        .mensagem-status.sucesso {
+            background: rgba(34, 197, 94, 0.15);
+            color: #4ade80;
+            border: 1px solid rgba(34, 197, 94, 0.3);
+            display: block;
+        }
+
+        .mensagem-status.erro {
+            background: rgba(239, 68, 68, 0.15);
+            color: #f87171;
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            display: block;
+        }
+
+        .link-voltar {
+            display: inline-block;
+            margin-top: 20px;
+            font-size: 11px;
+            font-weight: 600;
+            color: #94a3b8;
+            text-decoration: none;
+            transition: color 0.2s;
+        }
+
+        .link-voltar:hover {
+            color: #38bdf8;
+        }
+
+        .modal-overlay {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.75);
+            backdrop-filter: blur(5px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+
+        .modal-card {
+            background: #1e293b;
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            border-radius: 16px;
+            padding: 25px;
+            max-width: 380px;
+            width: 90%;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6);
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+
+<!-- Modal de Senha do Admin -->
+<div class="modal-overlay" id="modalSenhaAdmin">
+    <div class="modal-card">
+        <h4 style="color: #38bdf8; margin-bottom: 10px; font-size: 16px;">Acesso Restrito ao Admin</h4>
+        <p style="margin-bottom: 15px; font-size: 12px; color: #cbd5e1;">Digite a senha de administrador (0703):</p>
+        <input type="password" id="inputSenhaAdmin" placeholder="Senha" style="width: 100%; font-size: 14px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.2); border-radius: 8px; padding: 10px; color: #fff; text-align: center; margin-bottom: 15px; outline: none;" onkeydown="if(event.key === 'Enter') verificarSenhaAdmin()">
+        <button onclick="verificarSenhaAdmin()" class="btn-atualizar">Entrar</button>
+        <p id="erroSenhaAdmin" style="color: #f87171; font-size: 11px; margin-top: 12px; display: none;">Senha incorreta. Tente novamente.</p>
+    </div>
+</div>
+
+<div class="admin-container">
+    <h2>Painel Administrativo</h2>
+    <p>Gerencie a senha de acesso da Calculadora de Preços.</p>
+    
+    <!-- Exibição da Senha Atual -->
+    <div class="painel-senha-atual">
+        <span>Senha Atual da Calculadora</span>
+        <strong id="exibirSenhaAtual">Carregando...</strong>
+    </div>
+
+    <div class="campo-grupo">
+        <label for="novaSenha">Nova Senha de Acesso</label>
+        <input type="password" id="novaSenha" placeholder="Digite a nova senha..." autocomplete="off">
+    </div>
+    
+    <button class="btn-atualizar" onclick="salvarSenhaAdmin()">Salvar Nova Senha</button>
+    
+    <div id="mensagemStatus" class="mensagem-status"></div>
+    
+    <a href="index.html" class="link-voltar">← Ir para a Calculadora</a>
+</div>
+
+<script>
+    function verificarSenhaAdmin() {
+        const senhaDigitada = document.getElementById('inputSenhaAdmin').value;
+        if (senhaDigitada === '0703') {
+            document.getElementById('modalSenhaAdmin').style.display = 'none';
+            carregarSenhaAtual();
+        } else {
+            const erroEl = document.getElementById('erroSenhaAdmin');
+            erroEl.style.display = 'block';
+            document.getElementById('inputSenhaAdmin').value = '';
+            document.getElementById('inputSenhaAdmin').focus();
+        }
+    }
+
+    window.onload = () => {
+        document.getElementById('inputSenhaAdmin').focus();
+    };
+
+    function carregarSenhaAtual() {
+        // Exibe o que está salvo (localmente ou nuvem)
+        const senhaSalva = localStorage.getItem('senhaAppCalculadora') || '1';
+        document.getElementById('exibirSenhaAtual').innerText = senhaSalva;
+    }
+
+    async function salvarSenhaAdmin() {
+        const novaSenha = document.getElementById('novaSenha').value;
+        const statusEl = document.getElementById('mensagemStatus');
+
+        if (!novaSenha) {
+            statusEl.className = 'mensagem-status erro';
+            statusEl.innerText = 'A senha não pode estar vazia!';
+            return;
+        }
+
+        statusEl.className = 'mensagem-status';
+        statusEl.style.display = 'block';
+        statusEl.style.color = '#38bdf8';
+        statusEl.innerText = 'Atualizando senha...';
+
+        try {
+            // Caso utilize o Cloudflare Worker no futuro, a requisição entra aqui.
+            // Por enquanto, salvamos no localStorage para teste local:
+            localStorage.setItem('senhaAppCalculadora', novaSenha);
+            
+            document.getElementById('exibirSenhaAtual').innerText = novaSenha;
+            statusEl.className = 'mensagem-status sucesso';
+            statusEl.innerText = 'Nova senha salva com sucesso!';
+            document.getElementById('novaSenha').value = '';
+        } catch (e) {
+            statusEl.className = 'mensagem-status erro';
+            statusEl.innerText = 'Erro ao salvar a nova senha.';
+        }
+    }
+</script>
+
+</body>
+</html>
