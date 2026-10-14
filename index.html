@@ -1000,6 +1000,78 @@
             border: 1px solid rgba(239, 68, 68, 0.3);
         }
 
+        /* ESTILOS DO MODAL EM TELA CHEIA DO SITE DANFE */
+        .modal-site-overlay {
+            position: fixed;
+            top: 0; left: 0; width: 100vw; height: 100vh;
+            background: rgba(15, 23, 42, 0.85);
+            backdrop-filter: blur(8px);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 2000;
+            padding: 20px;
+        }
+
+        .modal-site-card {
+            background: #0f172a;
+            border: 1px solid rgba(56, 189, 248, 0.3);
+            border-radius: 14px;
+            width: 100%;
+            height: 100%;
+            max-width: 1300px;
+            max-height: 900px;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.6);
+        }
+
+        .modal-site-header {
+            background: #1e293b;
+            padding: 10px 16px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .modal-site-header h3 {
+            font-size: 13px;
+            color: #38bdf8;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-fechar-modal-site {
+            background: rgba(239, 68, 68, 0.2);
+            border: 1px solid rgba(239, 68, 68, 0.4);
+            color: #f87171;
+            padding: 5px 12px;
+            border-radius: 6px;
+            font-size: 11px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-fechar-modal-site:hover {
+            background: rgba(239, 68, 68, 0.4);
+            color: #fff;
+        }
+
+        .modal-site-body {
+            flex: 1;
+            position: relative;
+            background: #fff;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
         @media (max-width: 900px) {
             .nfe-detalhes-card { grid-template-columns: 1fr; }
         }
@@ -1016,6 +1088,7 @@
             .rateio-buttons { flex-direction: column; }
             header { flex-direction: column; align-items: flex-start; gap: 8px; }
             .actions-group { width: 100%; justify-content: flex-start; flex-wrap: wrap; }
+            .modal-site-overlay { padding: 5px; }
         }
     </style>
 </head>
@@ -1079,6 +1152,23 @@
     </div>
 </div>
 
+<!-- MODAL EM TELA CHEIA DO SITE CONSULTA DANFE -->
+<div class="modal-site-overlay" id="modalSiteDanfe">
+    <div class="modal-site-card">
+        <div class="modal-site-header">
+            <h3>🌐 Portal Consulta DANFE (Integrado)</h3>
+            <button class="btn-fechar-modal-site" onclick="fecharSiteDanfeModal()">✕ Fechar e Voltar ao App</button>
+        </div>
+        <div class="modal-site-body">
+            <div id="loadingSite" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: #0f172a; display: flex; flex-direction: column; align-items: center; justify-content: center; color: #38bdf8; font-weight: 600; z-index: 5;">
+                <div style="width: 36px; height: 36px; border: 4px solid rgba(56, 189, 248, 0.2); border-top-color: #38bdf8; border-radius: 50%; animation: spin 0.8s linear infinite; margin-bottom: 12px;"></div>
+                <p>Carregando site Consulta DANFE...</p>
+            </div>
+            <iframe id="iframeSiteDanfe" title="Consulta DANFE" style="width: 100%; height: 100%; border: none;"></iframe>
+        </div>
+    </div>
+</div>
+
 <div class="app-container">
     <div id="painelControlesTopo">
         <!-- Cabeçalho -->
@@ -1089,6 +1179,9 @@
             </div>
             
             <div class="actions-group">
+                <button class="btn-xml" onclick="abrirSiteDanfeModal()" style="background: rgba(56, 189, 248, 0.2); border-color: #38bdf8;">
+                    🌐 Site Consulta DANFE
+                </button>
                 <button class="btn-xml" onclick="abrirBaixadorNFe()">
                     📥 Baixar NF-e (PDF/XML)
                 </button>
@@ -1285,6 +1378,29 @@
 
     // Lógica do Baixador de NF-e
     const WORKER_URL = 'https://royal-sun-4b63.jmarcos5875466.workers.dev';
+    
+    // URL do Proxy Worker para o site completo
+    const SITE_DANFE_WORKER_URL = 'https://sparkling-wind-3e40.jmarcos5875466.workers.dev/';
+
+    function abrirSiteDanfeModal() {
+        const modal = document.getElementById('modalSiteDanfe');
+        const iframe = document.getElementById('iframeSiteDanfe');
+        const loading = document.getElementById('loadingSite');
+
+        modal.style.display = 'flex';
+
+        if (!iframe.src || iframe.src === 'about:blank') {
+            loading.style.display = 'flex';
+            iframe.src = SITE_DANFE_WORKER_URL;
+            iframe.onload = function() {
+                loading.style.display = 'none';
+            };
+        }
+    }
+
+    function fecharSiteDanfeModal() {
+        document.getElementById('modalSiteDanfe').style.display = 'none';
+    }
 
     function abrirBaixadorNFe() {
         document.getElementById('modalBaixadorNFe').style.display = 'flex';
@@ -1374,8 +1490,17 @@
         } catch (err) {
             let msg = err.message || '';
             if (msg.includes('/api/v1/danfe') || msg.includes('antigas') || msg.includes('mes corrente')) {
-                msg = 'A consulta pública aceita apenas notas recentes do mês corrente (ou do mês anterior se hoje for antes do dia 15). Para notas mais antigas, utilize a opção de Importar XML para carregar esta nota manualmente.';
+                statusBox.className = 'erro';
+                statusBox.innerHTML = `
+                    A consulta pública aceita apenas notas recentes do mês corrente (ou do mês anterior se hoje for antes do dia 15)[cite: 1].<br><br>
+                    💡 <strong>Alternativa:</strong> Para notas mais antigas, baixe o XML correspondente e faça a importação manual aqui no sistema[cite: 1].<br>
+                    <button onclick="abrirSiteDanfeModal(); fecharBaixadorNFe();" style="margin-top: 8px; background: #38bdf8; color: #0f172a; border: none; padding: 6px 12px; border-radius: 6px; font-weight: 700; font-size: 11px; cursor: pointer; display: inline-flex; align-items: center; gap: 5px;">
+                        🌐 Abrir Site Consulta DANFE Agora
+                    </button>
+                `;
+                statusBox.style.display = 'block';
                 document.getElementById('buttonGroupBaixador').style.display = 'none';
+                return;
             }
             statusBox.className = 'erro';
             statusBox.innerText = msg;
@@ -1436,8 +1561,17 @@
         } catch (err) {
             let msg = err.message || '';
             if (msg.includes('/api/v1/danfe') || msg.includes('antigas') || msg.includes('mes corrente')) {
-                msg = 'A consulta pública aceita apenas notas recentes do mês corrente (ou do mês anterior se hoje for antes do dia 15). Para notas mais antigas, utilize a opção de Importar XML para carregar esta nota manualmente.';
+                statusBox.className = 'erro';
+                statusBox.innerHTML = `
+                    A consulta pública aceita apenas notas recentes do mês corrente (ou do mês anterior se hoje for antes do dia 15)[cite: 1].<br><br>
+                    💡 <strong>Alternativa:</strong> Para notas mais antigas, baixe o XML correspondente e faça a importação manual aqui no sistema[cite: 1].<br>
+                    <button onclick="abrirSiteDanfeModal(); fecharBaixadorNFe();" style="margin-top: 8px; background: #38bdf8; color: #0f172a; border: none; padding: 6px 12px; border-radius: 6px; font-weight: 700; font-size: 11px; cursor: pointer; display: inline-flex; align-items: center; gap: 5px;">
+                        🌐 Abrir Site Consulta DANFE Agora
+                    </button>
+                `;
+                statusBox.style.display = 'block';
                 document.getElementById('buttonGroupBaixador').style.display = 'none';
+                return;
             }
             statusBox.className = 'erro';
             statusBox.innerText = msg;
