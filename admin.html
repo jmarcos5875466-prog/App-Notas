@@ -222,7 +222,7 @@
     <!-- Exibição da Senha Atual -->
     <div class="painel-senha-atual">
         <span>Senha Atual da Calculadora</span>
-        <strong id="exibirSenhaAtual">Carregando...</strong>
+        <strong id="exibirSenhaAtual">A carregar...</strong>
     </div>
 
     <div class="campo-grupo">
@@ -238,6 +238,8 @@
 </div>
 
 <script>
+    const WORKER_URL = 'https://app-notas.jmarcos5875466.workers.dev/api/senha';
+
     function verificarSenhaAdmin() {
         const senhaDigitada = document.getElementById('inputSenhaAdmin').value;
         if (senhaDigitada === '0703') {
@@ -255,10 +257,15 @@
         document.getElementById('inputSenhaAdmin').focus();
     };
 
-    function carregarSenhaAtual() {
-        // Exibe o que está salvo (localmente ou nuvem)
-        const senhaSalva = localStorage.getItem('senhaAppCalculadora') || '1';
-        document.getElementById('exibirSenhaAtual').innerText = senhaSalva;
+    async function carregarSenhaAtual() {
+        try {
+            const resposta = await fetch(WORKER_URL);
+            const dados = await resposta.json();
+            document.getElementById('exibirSenhaAtual').innerText = dados.senha || '1';
+        } catch (e) {
+            const senhaSalva = localStorage.getItem('senhaAppCalculadora') || '1';
+            document.getElementById('exibirSenhaAtual').innerText = senhaSalva;
+        }
     }
 
     async function salvarSenhaAdmin() {
@@ -274,20 +281,29 @@
         statusEl.className = 'mensagem-status';
         statusEl.style.display = 'block';
         statusEl.style.color = '#38bdf8';
-        statusEl.innerText = 'Atualizando senha...';
+        statusEl.innerText = 'A atualizar senha na nuvem...';
 
         try {
-            // Caso utilize o Cloudflare Worker no futuro, a requisição entra aqui.
-            // Por enquanto, salvamos no localStorage para teste local:
+            const resposta = await fetch(WORKER_URL, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ senha: novaSenha })
+            });
+
+            if (resposta.ok) {
+                document.getElementById('exibirSenhaAtual').innerText = novaSenha;
+                statusEl.className = 'mensagem-status sucesso';
+                statusEl.innerText = 'Nova senha guardada com sucesso na nuvem!';
+                document.getElementById('novaSenha').value = '';
+            } else {
+                throw new Error();
+            }
+        } catch (e) {
             localStorage.setItem('senhaAppCalculadora', novaSenha);
-            
             document.getElementById('exibirSenhaAtual').innerText = novaSenha;
             statusEl.className = 'mensagem-status sucesso';
-            statusEl.innerText = 'Nova senha salva com sucesso!';
+            statusEl.innerText = 'Nova senha guardada (Modo local)';
             document.getElementById('novaSenha').value = '';
-        } catch (e) {
-            statusEl.className = 'mensagem-status erro';
-            statusEl.innerText = 'Erro ao salvar a nova senha.';
         }
     }
 </script>
