@@ -461,6 +461,12 @@
             border-radius: 10px;
             padding: 8px 12px;
             display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .controls-row {
+            display: flex;
             flex-direction: row;
             align-items: center;
             justify-content: space-between;
@@ -480,6 +486,7 @@
             display: flex;
             gap: 12px;
             align-items: center;
+            flex-wrap: wrap;
         }
 
         .toggle-container {
@@ -1019,7 +1026,9 @@
                 </div>
 
                 <div class="controls-panel" id="painelExibicaoPadrao" style="display: flex;">
-                    <div class="controls-title">Personalizar Exibição:</div>
+                    <div class="controls-row">
+                        <div class="controls-title">Personalizar Exibição:</div>
+                    </div>
                     <div class="toggles-group">
                         <label class="toggle-container">
                             <span>Nome do Produto</span>
@@ -1032,6 +1041,13 @@
                             <span>Margem Individual</span>
                             <div class="switch">
                                 <input type="checkbox" id="toggleMargemIndividualPadrao" onchange="sincronizarToggleMargem(this)">
+                                <span class="slider"></span>
+                            </div>
+                        </label>
+                        <label class="toggle-container">
+                            <span>Calcular Imposto/Acréscimo</span>
+                            <div class="switch">
+                                <input type="checkbox" id="toggleIncluirImposto" checked onchange="sincronizarToggleImposto(this)">
                                 <span class="slider"></span>
                             </div>
                         </label>
@@ -1210,6 +1226,7 @@
             diferencaNotaGlobal: 0,
             toggleNome: true,
             toggleMargemInd: false,
+            toggleIncluirImposto: true,
             dadosProdutos: {},
             qtdLinhasAtivas: 0
         };
@@ -1281,6 +1298,7 @@
         aba.margemCustom = document.getElementById('margemCustomInput').value;
         aba.toggleNome = document.getElementById('toggleNomePadrao').checked;
         aba.toggleMargemInd = document.getElementById('toggleMargemIndividualPadrao').checked;
+        aba.toggleIncluirImposto = document.getElementById('toggleIncluirImposto').checked;
 
         for (let i = 1; i <= aba.qtdLinhasAtivas; i++) {
             if (!aba.dadosProdutos[i]) {
@@ -1324,6 +1342,7 @@
         document.getElementById('margemCustomInput').value = aba.margemCustom || '';
         document.getElementById('toggleNomePadrao').checked = aba.toggleNome;
         document.getElementById('toggleMargemIndividualPadrao').checked = aba.toggleMargemInd;
+        document.getElementById('toggleIncluirImposto').checked = aba.toggleIncluirImposto;
 
         document.querySelectorAll('.margin-btn').forEach(btn => btn.classList.remove('active'));
         if (aba.margemSelecionada !== null) {
@@ -1416,7 +1435,7 @@
         const blocoValor = document.getElementById('blocoImpostoValor');
         const blocoOpcoesRateio = document.getElementById('blocoOpcoesRateio');
 
-        if (aba.temStNaNota) {
+        if (aba.temStNaNota && aba.toggleIncluirImposto) {
             blocoSt.style.display = 'block';
             blocoValor.style.display = 'none';
             blocoOpcoesRateio.style.display = 'none';
@@ -1424,7 +1443,7 @@
             blocoSt.style.display = 'none';
             blocoValor.style.display = 'block';
 
-            if (vNota > 0 && vProd > 0) {
+            if (vNota > 0 && vProd > 0 && aba.toggleIncluirImposto) {
                 if (vNota > vProd) {
                     aba.tipoAjusteNota = 'imposto';
                     aba.diferencaNotaGlobal = vNota - vProd;
@@ -1480,6 +1499,13 @@
         if (aba) aba.toggleMargemInd = el.checked;
         document.getElementById('toggleMargemIndividualPadrao').checked = el.checked;
         construirTabela(true);
+    }
+
+    function sincronizarToggleImposto(el) {
+        const aba = getAbaAtual();
+        if (aba) aba.toggleIncluirImposto = el.checked;
+        document.getElementById('toggleIncluirImposto').checked = el.checked;
+        calcularImpostoAuto();
     }
 
     function getTagText(element, tagName) {
@@ -1674,6 +1700,7 @@
         aba.diferencaNotaGlobal = 0;
         aba.toggleNome = true;
         aba.toggleMargemInd = false;
+        aba.toggleIncluirImposto = true;
         aba.dadosProdutos = {};
         aba.qtdLinhasAtivas = 0;
         aba.margemSelecionada = null;
@@ -1705,16 +1732,19 @@
 
         const mostrarNome = aba.toggleNome;
         const margemIndividual = aba.toggleMargemInd;
-        const mostrarColunaAcrecimo = (!aba.temStNaNota && aba.tipoAjusteNota === 'imposto' && aba.diferencaNotaGlobal > 0);
+        const incluirImposto = aba.toggleIncluirImposto;
+        const mostrarColunaAcrecimo = (incluirImposto && !aba.temStNaNota && aba.tipoAjusteNota === 'imposto' && aba.diferencaNotaGlobal > 0);
 
         let thHTML = '';
         if (mostrarNome) thHTML += `<th>Nome do Produto</th>`;
         thHTML += `<th>Valor Total</th>`;
         
-        if (aba.temStNaNota) {
-            thHTML += `<th>ICMS ST</th>`;
-        } else if (mostrarColunaAcrecimo) {
-            thHTML += `<th>Acréscimo</th>`;
+        if (incluirImposto) {
+            if (aba.temStNaNota) {
+                thHTML += `<th>ICMS ST</th>`;
+            } else if (mostrarColunaAcrecimo) {
+                thHTML += `<th>Acréscimo</th>`;
+            }
         }
 
         thHTML += `<th>Custo Total</th>`;
@@ -1745,10 +1775,12 @@
             }
             linhasHTML += `<td><input type="text" id="total_${i}" class="input-custo input-custo-readonly" value="${valTotal}" readonly tabindex="-1"></td>`;
             
-            if (aba.temStNaNota) {
-                linhasHTML += `<td><input type="text" id="icmsST_${i}" class="input-custo input-custo-readonly" value="${valIcmsST}" readonly tabindex="-1"></td>`;
-            } else if (mostrarColunaAcrecimo) {
-                linhasHTML += `<td id="parcelaAjuste_${i}" class="badge-imposto">R$ 0,00</td>`;
+            if (incluirImposto) {
+                if (aba.temStNaNota) {
+                    linhasHTML += `<td><input type="text" id="icmsST_${i}" class="input-custo input-custo-readonly" value="${valIcmsST}" readonly tabindex="-1"></td>`;
+                } else if (mostrarColunaAcrecimo) {
+                    linhasHTML += `<td id="parcelaAjuste_${i}" class="badge-imposto">R$ 0,00</td>`;
+                }
             }
 
             linhasHTML += `<td id="custoTotalComImposto_${i}" class="badge-custo-total">R$ 0,00</td>`;
@@ -1776,7 +1808,8 @@
         if (!aba) return;
 
         const margemIndividual = aba.toggleMargemInd;
-        const mostrarColunaAcrecimo = (!aba.temStNaNota && aba.tipoAjusteNota === 'imposto' && aba.diferencaNotaGlobal > 0);
+        const incluirImposto = aba.toggleIncluirImposto;
+        const mostrarColunaAcrecimo = (incluirImposto && !aba.temStNaNota && aba.tipoAjusteNota === 'imposto' && aba.diferencaNotaGlobal > 0);
 
         let somaStGlobal = 0;
         let somaProdutosAtual = 0;
@@ -1786,7 +1819,7 @@
             somaProdutosAtual += parseFloat(aba.dadosProdutos[i]?.valorTotal) || 0;
         }
 
-        if (aba.temStNaNota) {
+        if (aba.temStNaNota && incluirImposto) {
             document.getElementById('totalStImposto').value = formatarBR(somaStGlobal);
         }
 
@@ -1804,7 +1837,7 @@
             if (qLote <= 0) qLote = 1;
 
             let alteracaoLinha = 0;
-            if (mostrarColunaAcrecimo && aba.diferencaNotaGlobal > 0) {
+            if (incluirImposto && mostrarColunaAcrecimo && aba.diferencaNotaGlobal > 0) {
                 if (aba.tipoRateioAcrecimo === 'proporcional') {
                     const proporcao = somaProdutosAtual > 0 ? (vTotalCaixa / somaProdutosAtual) : 0;
                     alteracaoLinha = aba.diferencaNotaGlobal * proporcao;
@@ -1815,10 +1848,12 @@
             }
 
             let custoTotalLinha = vTotalCaixa;
-            if (aba.temStNaNota) {
-                custoTotalLinha += (parseFloat(item.icmsST) || 0);
-            } else if (mostrarColunaAcrecimo) {
-                custoTotalLinha += alteracaoLinha;
+            if (incluirImposto) {
+                if (aba.temStNaNota) {
+                    custoTotalLinha += (parseFloat(item.icmsST) || 0);
+                } else if (mostrarColunaAcrecimo) {
+                    custoTotalLinha += alteracaoLinha;
+                }
             }
 
             let custoUnitarioFinal = custoTotalLinha / qLote;
