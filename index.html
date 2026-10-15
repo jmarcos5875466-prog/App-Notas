@@ -874,7 +874,7 @@
     </div>
 </div>
 
-<!-- Modal de Senha Integrado com Cloudflare -->
+<!-- Modal de Senha -->
 <div class="modal-overlay" id="modalSenha" style="display: flex;">
     <div class="modal-card" style="text-align: center;">
         <h4 style="justify-content: center; color: #38bdf8; margin-bottom: 15px;">Acesso Restrito</h4>
@@ -1093,8 +1093,6 @@
 </div>
 
 <script>
-    const WORKER_URL = 'https://app-notas.jmarcos5875466.workers.dev/api/senha';
-
     let abas = [];
     let abaAtivaId = null;
     let contadorAbas = 0;
@@ -1116,38 +1114,15 @@
         document.getElementById('modalAlertaImportacao').style.display = 'none';
     }
 
-    async function verificarSenha() {
+    function verificarSenha() {
         const senhaInput = document.getElementById('inputSenha').value;
-        const erro = document.getElementById('erroSenha');
-
-        if (!senhaInput) {
+        if (senhaInput === '1') {
+            document.getElementById('modalSenha').style.display = 'none';
+        } else {
+            const erro = document.getElementById('erroSenha');
             erro.style.display = 'block';
-            erro.innerText = 'Digite a senha!';
-            return;
-        }
-
-        try {
-            const resposta = await fetch(WORKER_URL);
-            const dados = await resposta.json();
-            const senhaCorreta = dados.senha || '1';
-
-            if (senhaInput === senhaCorreta) {
-                document.getElementById('modalSenha').style.display = 'none';
-            } else {
-                erro.style.display = 'block';
-                erro.innerText = 'Senha incorreta. Tente novamente.';
-                document.getElementById('inputSenha').value = '';
-                document.getElementById('inputSenha').focus();
-            }
-        } catch (e) {
-            const senhaLocal = localStorage.getItem('senhaAppCalculadora') || '1';
-            if (senhaInput === senhaLocal) {
-                document.getElementById('modalSenha').style.display = 'none';
-            } else {
-                erro.style.display = 'block';
-                erro.innerText = 'Erro de conexão ou senha incorreta.';
-                document.getElementById('inputSenha').value = '';
-            }
+            document.getElementById('inputSenha').value = '';
+            document.getElementById('inputSenha').focus();
         }
     }
 
